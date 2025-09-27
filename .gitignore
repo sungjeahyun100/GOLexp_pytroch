@@ -8,4 +8,5 @@ __pycache__/
 *.tar.gz
 train_data/
 saved_models/
+.venv/
 
