@@ -1,0 +1,1 @@
+-I/home/sjh100/바탕화면/pracPyTorch/CUDAcode -isystem "/usr/local/cuda-12.8/targets/x86_64-linux/include"

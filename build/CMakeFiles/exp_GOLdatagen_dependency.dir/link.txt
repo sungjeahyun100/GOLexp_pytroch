@@ -1,0 +1,2 @@
+/usr/bin/ar qc libexp_GOLdatagen_dependency.a CMakeFiles/exp_GOLdatagen_dependency.dir/CUDAcode/d_matrix_2.cu.o CMakeFiles/exp_GOLdatagen_dependency.dir/CUDAcode/GOLdatabase_2.cu.o
+/usr/bin/ranlib libexp_GOLdatagen_dependency.a

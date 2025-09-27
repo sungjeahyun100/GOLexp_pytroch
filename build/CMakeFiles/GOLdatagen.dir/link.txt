@@ -1,0 +1,1 @@
+/usr/bin/g++ -fPIC -shared -Wl,-soname,GOLdatagen.so -o GOLdatagen.so @CMakeFiles/GOLdatagen.dir/objects1.rsp CMakeFiles/GOLdatagen.dir/cmake_device_link.o @CMakeFiles/GOLdatagen.dir/linkLibs.rsp -L"/usr/local/cuda-12.8/targets/x86_64-linux/lib/stubs" -L"/usr/local/cuda-12.8/targets/x86_64-linux/lib"
