@@ -9,4 +9,5 @@ __pycache__/
 train_data/
 saved_models/
 .venv/
+build/
 

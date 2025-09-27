@@ -1,4 +1,0 @@
-/home/sjh100/바탕화면/pracPyTorch/build/CMakeFiles/exp_GOLdatagen_dependency.dir
-/home/sjh100/바탕화면/pracPyTorch/build/CMakeFiles/GOLdatagen.dir
-/home/sjh100/바탕화면/pracPyTorch/build/CMakeFiles/edit_cache.dir
-/home/sjh100/바탕화면/pracPyTorch/build/CMakeFiles/rebuild_cache.dir

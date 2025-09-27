@@ -1,1 +1,0 @@
- -lexp_GOL -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
