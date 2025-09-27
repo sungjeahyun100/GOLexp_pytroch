@@ -1,11 +1,4 @@
 __pycache__/
-*.pt
-*.pth
-*.ckpt
-*.bin
-*.zip
-*.tar
-*.tar.gz
 train_data/
 saved_models/
 .venv/
