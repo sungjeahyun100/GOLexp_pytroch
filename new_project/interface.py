@@ -6,6 +6,9 @@ import torch.nn.functional as F
 import ctypes as ct 
 import argparse
 
+# src 모듈에서 모델 임포트
+from src.model import CNNLayer, get_activation, load_model, predict_to_number
+
 kernel_path = '../build/GOLdatagen.so'
 
 lib = ct.CDLL(kernel_path)
@@ -60,61 +63,7 @@ def getActive(activeName, input):
         return F.tanh(input)
 
 
-# CNN 모델 정의 (모델에서 가져옴)
-class cnnLayer(nn.Module):
-    def __init__(self, inputSize, hidden1Size, hidden2Size, outputSize, activate, stride, use_bias):
-        super(cnnLayer, self).__init__()
-        
-        # CNN 레이어들 (3개)
-        self.conv1 = nn.Conv2d(1, hidden1Size, kernel_size=3, stride=stride, padding=1, bias=use_bias)
-        self.conv2 = nn.Conv2d(hidden1Size, hidden2Size, kernel_size=3, stride=stride, padding=1, bias=use_bias)
-        self.conv3 = nn.Conv2d(hidden2Size, hidden2Size*2, kernel_size=3, stride=stride, padding=1, bias=use_bias)
-        
-        # 풀링 레이어
-        self.pool = nn.MaxPool2d(2, 2)
-        
-        # 배치 정규화
-        self.bn1 = nn.BatchNorm2d(hidden1Size, affine=False)
-        self.bn2 = nn.BatchNorm2d(hidden2Size, affine=False)
-        self.bn3 = nn.BatchNorm2d(hidden2Size*2, affine=False)
-        
-        # FC layer 입력 크기 계산
-        self._calculate_fc_input_size(inputSize, hidden2Size*2)
-        
-        # Dense 레이어들 (5개)
-        self.fc1 = nn.Linear(self.fc_input_size, 1024, bias=use_bias)
-        self.fc2 = nn.Linear(1024, 512, bias=use_bias)
-        self.fc3 = nn.Linear(512, 256, bias=use_bias)
-        self.fc4 = nn.Linear(256, 128, bias=use_bias)
-        self.fc5 = nn.Linear(128, outputSize, bias=use_bias)
-        
-        # 활성화 함수 저장
-        self.fc_act = activate
-    
-    def _calculate_fc_input_size(self, inputSize, final_channels):
-        size_after_conv = max(1, inputSize // 8)
-        self.fc_input_size = final_channels * size_after_conv * size_after_conv
-    
-    def forward(self, x):
-        if x.dim() == 3:
-            x = x.unsqueeze(1)
-        
-        # CNN 레이어들
-        x = self.pool(getActive(self.fc_act, self.bn1(self.conv1(x))))
-        x = self.pool(getActive(self.fc_act, self.bn2(self.conv2(x))))
-        x = self.pool(getActive(self.fc_act, self.bn3(self.conv3(x))))
-        
-        # Flatten
-        x = x.view(x.size(0), -1)
-        
-        # Dense 레이어들
-        x = getActive(self.fc_act, self.fc1(x))
-        x = getActive(self.fc_act, self.fc2(x))
-        x = getActive(self.fc_act, self.fc3(x))
-        x = getActive(self.fc_act, self.fc4(x))
-        x = torch.sigmoid(self.fc5(x))  # 8bit 출력용
-        
-        return x
+# 모델 정의는 이제 src.model에서 임포트됨
 
 class GameOfLifeInterface:
     def __init__(self, model_path="saved_models/cnn_gol_model1.pth"):
@@ -154,11 +103,11 @@ class GameOfLifeInterface:
             self.model_info = checkpoint.get('model_info', {})
             
             # 모델 생성
-            self.model = cnnLayer(
-                inputSize=self.model_info.get('input_size', 10),
-                hidden1Size=self.model_info.get('hidden1_size', 32),
-                hidden2Size=self.model_info.get('hidden2_size', 64),
-                outputSize=self.model_info.get('output_size', 10),
+            self.model = CNNLayer(
+                input_size=self.model_info.get('input_size', 50),
+                hidden1_size=self.model_info.get('hidden1_size', 32),
+                hidden2_size=self.model_info.get('hidden2_size', 64),
+                output_size=self.model_info.get('output_size', 10),
                 activate=self.model_info.get('activate', 'swish'),
                 stride=self.model_info.get('stride', 1),
                 use_bias=False
@@ -386,7 +335,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # 저장된 모델 경로
-    model_path = "saved_models/" + args.model_name
+    model_path = args.model_name
     
     interface = GameOfLifeInterface(model_path)
     interface.run()
