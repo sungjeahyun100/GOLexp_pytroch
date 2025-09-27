@@ -6,6 +6,6 @@ __pycache__/
 *.zip
 *.tar
 *.tar.gz
-data/
-outputs/
+train_data/
+saved_models/
 
