@@ -7,11 +7,13 @@ Game of Life 패턴을 PyTorch로 학습하는 복잡계 AI 실험 프로젝트
 - cmake
 - make  
 - python3.12
-- CUDA (GPU 가속용, 선택사항)
+- CUDA
 
 ## 🚀 설정 스크립트
 
 ```bash
+git clone https://github.com/sungjeahyun100/GOLexp_pytroch.git
+
 # 1. 데이터 디렉토리 생성
 mkdir train_data
 
