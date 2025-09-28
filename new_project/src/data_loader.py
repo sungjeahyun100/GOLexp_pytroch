@@ -157,15 +157,64 @@ class DatasetLoader:
             print("❌ 지원하지 않는 데이터셋 타입: {}".format(dataset_info['type']))
             return None
         
-        # 파일 경로 절대 경로로 변환
-        base_dir = os.path.dirname(os.path.abspath(self.config_path))
+        # 파일 경로 절대 경로로 변환 (더 견고한 방식)
+        # 1. config 파일 기준으로 경로 해석
+        config_dir = os.path.dirname(os.path.abspath(self.config_path))
+        # 2. 현재 작업 디렉토리도 고려 (train.py가 실행되는 위치)
+        current_dir = os.getcwd()
+        
         file_paths = []
         
         for path in dataset_info['paths']:
-            if not os.path.isabs(path):
-                abs_path = os.path.join(base_dir, path)
-            else:
+            if os.path.isabs(path):
+                # 절대 경로인 경우 그대로 사용
                 abs_path = path
+            else:
+                # 상대 경로인 경우 여러 방법으로 시도
+                abs_path = None
+                
+                # 방법 1: config 파일 기준으로 해석
+                try_path1 = os.path.join(config_dir, path)
+                
+                # 방법 2: 현재 작업 디렉토리 기준으로 해석
+                try_path2 = os.path.join(current_dir, path)
+                
+                # 방법 3: 프로젝트 루트에서 train_data 찾기
+                # config_dir의 부모 디렉토리에서 train_data 폴더 찾기
+                project_root = os.path.dirname(config_dir)
+                filename = os.path.basename(path)
+                try_path3 = os.path.join(project_root, 'train_data', filename)
+                
+                # 방법 4: 파일명만 있는 경우, train_data 폴더를 여러 위치에서 찾기
+                if '/' not in path and '\\' not in path:  # 파일명만 있는 경우
+                    # 현재 디렉토리에서 train_data 찾기
+                    try_path4 = os.path.join(current_dir, 'train_data', path)
+                    # 상위 디렉토리에서 train_data 찾기
+                    try_path5 = os.path.join(os.path.dirname(current_dir), 'train_data', path)
+                else:
+                    try_path4 = try_path5 = None
+                
+                # 존재하는 경로 찾기
+                candidates = [try_path1, try_path2, try_path3]
+                if try_path4:
+                    candidates.append(try_path4)
+                if try_path5:
+                    candidates.append(try_path5)
+                    
+                for candidate in candidates:
+                    if candidate and os.path.exists(candidate):
+                        abs_path = candidate
+                        break
+                
+                # 디버깅을 위한 정보 출력
+                if abs_path is None:
+                    print("🔍 파일 '{}' 경로 탐색 결과:".format(os.path.basename(path)))
+                    for i, candidate in enumerate(candidates, 1):
+                        if candidate:
+                            exists = "✅" if os.path.exists(candidate) else "❌"
+                            print("   {}. {} {}".format(i, exists, candidate))
+                    abs_path = try_path1  # 기본값으로 첫 번째 시도 사용
+            
             file_paths.append(abs_path)
         
         print("📂 데이터셋 로딩: {} ({}개 파일)".format(dataset_info['name'], len(file_paths)))
