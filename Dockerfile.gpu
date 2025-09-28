@@ -1,0 +1,51 @@
+# GPU 지원 Dockerfile - CUDA + PyTorch
+FROM nvidia/cuda:12.1-devel-ubuntu22.04
+
+# 환경 변수 설정
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV CUDA_VISIBLE_DEVICES=0
+
+# 시스템 패키지 업데이트 및 필수 도구 설치
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    gcc-12 \
+    g++-12 \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# GCC-12를 기본 컴파일러로 설정 (CUDA 호환성)
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+
+# Python 의존성 설치
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 프로젝트 파일 복사
+COPY . .
+
+# CMake 빌드
+RUN mkdir -p build && cd build \
+    && cmake .. \
+    && make -j$(nproc)
+
+# 권한 설정
+RUN chmod +x /app/genData.sh
+
+# 기본 명령어 설정
+CMD ["bash"]
+
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import torch; print('GPU available:', torch.cuda.is_available())" || exit 1

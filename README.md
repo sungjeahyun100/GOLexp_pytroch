@@ -2,7 +2,32 @@
 
 Game of Life 패턴을 PyTorch로 학습하는 복잡계 AI 실험 프로젝트
 
-## 📋 필요한 것
+## � Docker로 빠른 시작 (권장)
+
+**가장 쉬운 방법**: Docker를 사용하면 환경 설정 없이 바로 실행 가능!
+
+```bash
+# 1. 프로젝트 클론
+git clone https://github.com/sungjeahyun100/GOLexp_pytroch.git
+cd GOLexp_pytroch
+
+# 2. Docker 환경 자동 구축
+./docker-setup.sh
+
+# 3. 컨테이너 실행 (GPU 지원)
+docker-compose up -d golexp-gpu
+docker-compose exec golexp-gpu bash
+
+# 4. 바로 훈련 시작!
+cd new_project
+python3 train.py --dataset small_simulation --epochs 50
+```
+
+📖 **자세한 Docker 사용법**: [DOCKER.md](DOCKER.md) 참조
+
+---
+
+## �📋 수동 설치 (필요한 것)
 
 - cmake
 - make  

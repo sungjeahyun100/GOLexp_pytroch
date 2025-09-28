@@ -1,0 +1,9 @@
+# CPU 버전 Python 의존성  
+torch>=2.0.0+cpu
+torchvision>=0.15.0+cpu
+numpy>=1.21.0
+matplotlib>=3.5.0
+tqdm>=4.64.0
+argparse
+Pillow>=9.0.0
+scipy>=1.9.0

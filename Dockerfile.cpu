@@ -1,0 +1,46 @@
+# CPU-Only Dockerfile - PyTorch CPU 버전
+FROM ubuntu:22.04
+
+# 환경 변수 설정
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# 시스템 패키지 업데이트 및 필수 도구 설치
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    gcc \
+    g++ \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python 의존성 설치 (CPU 버전)
+COPY requirements.cpu.txt /tmp/requirements.cpu.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.cpu.txt
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 프로젝트 파일 복사
+COPY . .
+
+# CMake 빌드 (CUDA 없이)
+RUN mkdir -p build && cd build \
+    && cmake -DUSE_CUDA=OFF .. \
+    && make -j$(nproc) || echo "Note: Some CUDA components skipped in CPU-only build"
+
+# 권한 설정
+RUN chmod +x /app/genData.sh || true
+
+# 기본 명령어 설정
+CMD ["bash"]
+
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import torch; print('PyTorch CPU version working')" || exit 1

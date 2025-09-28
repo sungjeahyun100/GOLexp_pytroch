@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # GPU 지원 서비스
+  golexp-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    image: golexp:gpu
+    container_name: golexp-gpu
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - .:/app
+      - ./train_data:/app/train_data
+      - ./new_project/saved_models:/app/new_project/saved_models
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # CPU 전용 서비스
+  golexp-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: golexp:cpu
+    container_name: golexp-cpu
+    volumes:
+      - .:/app
+      - ./train_data:/app/train_data
+      - ./new_project/saved_models:/app/new_project/saved_models
+    working_dir: /app
+    tty: true
+    stdin_open: true
+
+  # 개발 환경 (볼륨 마운트로 실시간 개발)
+  golexp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    image: golexp:dev
+    container_name: golexp-dev
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    network_mode: "host"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

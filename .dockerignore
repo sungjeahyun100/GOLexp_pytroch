@@ -1,0 +1,59 @@
+# Git 관련
+.git
+.gitignore
+
+# Python 관련
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.venv
+.pytest_cache
+
+# 빌드 파일 (Docker에서 새로 빌드)
+build/
+*.o
+*.so
+*.a
+
+# IDE 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# 대용량 파일들
+# train_data/  # 필요시 주석 해제
+*.zip
+*.tar.gz
+
+# 임시 파일들
+tmp/
+temp/
+*.tmp
+*.bak
+
+# 로그 파일들
+*.log
+logs/
+
+# 문서 파일들 (빌드에 불필요)
+*.md
+LICENSE
+docs/
