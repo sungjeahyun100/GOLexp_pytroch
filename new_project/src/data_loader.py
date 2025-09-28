@@ -113,6 +113,32 @@ class DatasetLoader:
         self.config = {}
         self.load_config()
     
+    def _find_git_or_project_root(self, start_path: str) -> Optional[str]:
+        """Git 루트나 프로젝트 루트 디렉토리를 찾습니다"""
+        current = os.path.abspath(start_path)
+        
+        # 최대 5단계까지 상위 디렉토리로 이동
+        for _ in range(5):
+            # .git 폴더가 있는지 확인
+            if os.path.exists(os.path.join(current, '.git')):
+                return current
+                
+            # train_data 폴더가 있는지 확인 (프로젝트 루트 표시)
+            if os.path.exists(os.path.join(current, 'train_data')):
+                return current
+                
+            # CMakeLists.txt나 README.md가 있으면 프로젝트 루트로 간주
+            if (os.path.exists(os.path.join(current, 'CMakeLists.txt')) or 
+                os.path.exists(os.path.join(current, 'README.md'))):
+                return current
+            
+            parent = os.path.dirname(current)
+            if parent == current:  # 루트 디렉토리에 도달
+                break
+            current = parent
+        
+        return None
+    
     def load_config(self):
         """JSON 설정 파일 로드"""
         try:
@@ -185,14 +211,20 @@ class DatasetLoader:
                 filename = os.path.basename(path)
                 try_path3 = os.path.join(project_root, 'train_data', filename)
                 
-                # 방법 4: 파일명만 있는 경우, train_data 폴더를 여러 위치에서 찾기
+                # 방법 4-6: 파일명만 있는 경우, train_data 폴더를 여러 위치에서 찾기
                 if '/' not in path and '\\' not in path:  # 파일명만 있는 경우
                     # 현재 디렉토리에서 train_data 찾기
                     try_path4 = os.path.join(current_dir, 'train_data', path)
-                    # 상위 디렉토리에서 train_data 찾기
+                    # 상위 디렉토리에서 train_data 찾기 
                     try_path5 = os.path.join(os.path.dirname(current_dir), 'train_data', path)
+                    # 상위 디렉토리의 상위에서 train_data 찾기 (git 루트 등)
+                    try_path6 = os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'train_data', path)
+                    
+                    # 방법 7: config 파일 경로에서 git 루트 찾기
+                    git_root = self._find_git_or_project_root(config_dir)
+                    try_path7 = os.path.join(git_root, 'train_data', path) if git_root else None
                 else:
-                    try_path4 = try_path5 = None
+                    try_path4 = try_path5 = try_path6 = try_path7 = None
                 
                 # 존재하는 경로 찾기
                 candidates = [try_path1, try_path2, try_path3]
@@ -200,13 +232,17 @@ class DatasetLoader:
                     candidates.append(try_path4)
                 if try_path5:
                     candidates.append(try_path5)
+                if try_path6:
+                    candidates.append(try_path6)
+                if try_path7:
+                    candidates.append(try_path7)
                     
                 for candidate in candidates:
                     if candidate and os.path.exists(candidate):
                         abs_path = candidate
                         break
                 
-                # 디버깅을 위한 정보 출력
+                # 디버깅을 위한 정보 출력 (파일을 찾지 못한 경우만)
                 if abs_path is None:
                     print("🔍 파일 '{}' 경로 탐색 결과:".format(os.path.basename(path)))
                     for i, candidate in enumerate(candidates, 1):
@@ -214,6 +250,10 @@ class DatasetLoader:
                             exists = "✅" if os.path.exists(candidate) else "❌"
                             print("   {}. {} {}".format(i, exists, candidate))
                     abs_path = try_path1  # 기본값으로 첫 번째 시도 사용
+                else:
+                    # 성공적으로 찾았을 때는 간단한 로그만 (첫 번째 파일에 대해서만)
+                    if path == dataset_info['paths'][0]:
+                        print("📁 데이터 파일 위치: {}".format(os.path.dirname(abs_path)))
             
             file_paths.append(abs_path)
         

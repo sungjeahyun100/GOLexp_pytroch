@@ -10,7 +10,7 @@ Game of Life 패턴을 PyTorch로 학습하는 복잡계 AI 실험 프로젝트
 - CUDA (GPU 가속용)
 - PyTorch, numpy, pygame
 
-## 🚀 빠른 시작
+## 🚀 필수 설정 스크립트
 
 ```bash
 # 1. 저장소 복제
@@ -117,13 +117,6 @@ python3 datagen.py --one_file=True <시드> <데이터량> <생존비율>
   - 이론적 하한: ~0.008
 - **훈련 시간**: RTX 4060 기준 ~10분/에폭 (full dataset)
 - **메모리 사용량**: ~4GB VRAM (batch_size=512)
-
-## 🔬 실험 목표
-
-복잡계(Game of Life)의 패턴을 AI가 어떻게 학습하는지 관찰:
-- 정보 손실 없는 순수한 학습
-- 카오스 이론과 나비 효과의 영향
-- 스케일링 법칙 검증
 
 ## 📁 프로젝트 구조
 
