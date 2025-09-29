@@ -1,5 +1,6 @@
 __pycache__/
 train_data/
+train_data_host/
 saved_models/
 .venv/
 build/

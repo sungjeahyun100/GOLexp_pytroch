@@ -40,6 +40,33 @@ check_docker() {
     log_info "Docker 환경 확인 완료"
 }
 
+# Docker 권한 확인
+check_docker_permissions() {
+    if ! docker info &> /dev/null; then
+        log_warn "Docker 권한이 없습니다."
+        echo
+        echo "해결 방법:"
+        echo "1) 임시로 sudo 사용: sudo $0"
+        echo "2) 사용자를 docker 그룹에 추가:"
+        echo "   sudo usermod -aG docker \$USER"
+        echo "   newgrp docker  # 또는 로그아웃 후 재로그인"
+        echo
+        read -p "sudo로 계속 실행하시겠습니까? (y/N): " choice
+        case $choice in
+            [yY]|[yY][eE][sS])
+                log_info "sudo 권한으로 재실행합니다..."
+                exec sudo "$0" "$@"
+                ;;
+            *)
+                log_error "Docker 권한 설정 후 다시 실행해주세요."
+                exit 1
+                ;;
+        esac
+    fi
+    
+    log_info "Docker 권한 확인 완료"
+}
+
 # NVIDIA Docker 확인
 check_nvidia_docker() {
     if docker run --rm --gpus all nvidia/cuda:12.1-base-ubuntu22.04 nvidia-smi &> /dev/null; then
@@ -144,6 +171,7 @@ main() {
     log_info "Docker 환경 구축 시작"
     
     check_docker
+    check_docker_permissions
     select_build_type
     
     echo

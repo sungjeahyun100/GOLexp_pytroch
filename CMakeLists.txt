@@ -91,6 +91,7 @@ if(USE_CUDA)
     set(SOURCE_FILES
         CUDAcode/d_matrix_2.cu
         CUDAcode/GOLdatabase_2.cu
+        CUDAcode/GOLdatabase_host.cpp
     )
     message(STATUS "Including CUDA source files")
 else()
@@ -101,6 +102,7 @@ endif()
 set(HEADER_FILES
     CUDAcode/d_matrix_2.hpp
     CUDAcode/GOLdatabase_2.hpp
+    CUDAcode/GOLdatabase_host.hpp
     CUDAcode/utility.hpp
 )
 

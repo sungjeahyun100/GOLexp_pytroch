@@ -1,4 +1,5 @@
 #include <GOLdatabase_2.hpp>
+#include <GOLdatabase_host.hpp>
 #include <d_matrix_2.hpp>
 
 extern "C"{
@@ -24,6 +25,14 @@ extern "C"{
         config.sample_quantity = sample_quantity;
         config.seed = seed;
         GOL_2::generateGameOfLifeDataInOneFile(sample_quantity, alive_ratio, seed, config);
+    }
+
+    void genGOLdataInHost(uint32_t seed, uint32_t sample_quantity, double alive_ratio){
+        dataset_id config;
+        config.alive_ratio = alive_ratio;
+        config.sample_quantity = sample_quantity;
+        config.seed = seed;
+        GOL_2_H::generateGameOfLifeDataInHost(config);
     }
 }
 

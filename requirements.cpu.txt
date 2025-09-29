@@ -1,9 +1,14 @@
-# CPU 버전 Python 의존성  
+# PyTorch CPU-only versions (no CUDA support)
+--find-links https://download.pytorch.org/whl/torch_stable.html
 torch>=2.0.0+cpu
 torchvision>=0.15.0+cpu
+torchaudio>=2.0.0+cpu
+
+# Core dependencies
 numpy>=1.21.0
 matplotlib>=3.5.0
-tqdm>=4.64.0
-argparse
-Pillow>=9.0.0
+
+# Optional but recommended
 scipy>=1.9.0
+Pillow>=9.0.0
+tqdm>=4.64.0
