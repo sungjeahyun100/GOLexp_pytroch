@@ -58,7 +58,7 @@ cd ..
 
 # 5. 데이터 생성
 mkdir train_data
-./genData.sh
+./genData.sh  # 자동으로 GPU/CPU 모드 선택
 
 # 6. 모델 훈련 시작
 cd new_project
@@ -135,6 +135,11 @@ python3 datagen.py 12345 1000 0.3 --cpu --verbose
 ```bash
 cd new_project
 python3 datagen.py 54321 10000 0.25 --one_file --verbose
+```
+
+**자동 데이터셋 생성** (99개 파일):
+```bash
+./genData.sh  # GPU/CPU 자동 선택, 0.01~0.99 비율
 ```
 
 **파라미터 설명**:

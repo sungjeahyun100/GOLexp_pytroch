@@ -2,7 +2,7 @@
 ARG CUDA_VERSION=12.1
 ARG BASE_IMAGE=nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04
 
-FROM ${BASE_IMAGE} as gpu-stage
+FROM ${BASE_IMAGE} as gpu-stage 
 
 # GPU 빌드 스테이지
 ENV DEBIAN_FRONTEND=noninteractive
@@ -21,7 +21,8 @@ WORKDIR /app
 COPY . .
 
 # Python 의존성 설치
-RUN pip3 install torch torchvision numpy matplotlib tqdm argparse
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
 
 # CMake 빌드
 RUN mkdir -p build && cd build && cmake .. && make -j$(nproc)
@@ -39,7 +40,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성
-RUN pip3 install torch torchvision numpy matplotlib tqdm argparse
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
 
 # 빌드된 파일 복사
 COPY --from=gpu-stage /app /app
