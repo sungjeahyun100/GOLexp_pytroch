@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # GPU 지원 서비스
   golexp-gpu:

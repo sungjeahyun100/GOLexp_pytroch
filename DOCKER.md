@@ -22,10 +22,10 @@ git clone <repository-url>
 cd GOLexp_pytroch
 
 # GPU 컨테이너 실행
-docker-compose up -d golexp-gpu
+docker compose up -d golexp-gpu
 
 # 컨테이너에 접속
-docker-compose exec golexp-gpu bash
+docker compose exec golexp-gpu bash
 
 # 훈련 실행
 cd new_project
@@ -35,10 +35,10 @@ python3 train.py --dataset small_simulation --epochs 50
 ### 2. CPU 전용 환경에서 실행
 ```bash
 # CPU 컨테이너 실행
-docker-compose up -d golexp-cpu
+docker compose up -d golexp-cpu
 
 # 컨테이너에 접속
-docker-compose exec golexp-cpu bash
+docker compose exec golexp-cpu bash
 
 # 훈련 실행
 cd new_project
@@ -48,10 +48,10 @@ python3 train.py --dataset small_simulation --epochs 50
 ### 3. 개발 환경에서 실행
 ```bash
 # 개발용 컨테이너 실행 (실시간 코드 변경 반영)
-docker-compose up -d golexp-dev
+docker compose up -d golexp-dev
 
 # 컨테이너에 접속
-docker-compose exec golexp-dev bash
+docker compose exec golexp-dev bash
 ```
 
 ## 🔧 상세 사용법
@@ -138,13 +138,13 @@ newgrp docker
 
 #### 캐시 없이 재빌드
 ```bash
-docker-compose build --no-cache golexp-gpu
+docker compose build --no-cache golexp-gpu
 ```
 
 #### 이미지 완전 재빌드
 ```bash
 docker system prune -a
-docker-compose build
+docker compose build
 ```
 
 ### 권한 문제
@@ -152,7 +152,7 @@ docker-compose build
 #### 볼륨 권한 설정
 ```bash
 # 컨테이너 내에서 권한 수정
-docker-compose exec golexp-gpu chown -R $(id -u):$(id -g) /app
+docker compose exec golexp-gpu chown -R $(id -u):$(id -g) /app
 ```
 
 ## 📁 볼륨 마운트
@@ -167,22 +167,22 @@ Docker Compose는 다음 디렉토리들을 자동으로 마운트합니다:
 
 ### 컨테이너 상태 확인
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ### 로그 확인
 ```bash
-docker-compose logs golexp-gpu
+docker compose logs golexp-gpu
 ```
 
 ### 컨테이너 정지
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### 이미지 제거
 ```bash
-docker-compose down --rmi all
+docker compose down --rmi all
 ```
 
 ## ⚡ 성능 최적화

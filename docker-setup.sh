@@ -32,8 +32,8 @@ check_docker() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-        log_error "Docker Compose가 설치되지 않았습니다."
+    if ! docker compose version &> /dev/null && ! command -v docker-compose &> /dev/null; then
+        log_error "Docker Compose가 설치되지 않았습니다. v2를 설치하거나 v1을 사용하세요."
         exit 1
     fi
     
@@ -221,11 +221,15 @@ run_container() {
     
     log_info "🐳 $service 컨테이너 시작 중..."
     
-    # docker-compose 또는 docker compose 사용
-    if command -v docker-compose &> /dev/null; then
-        COMPOSE_CMD="docker-compose"
-    else
+    # Docker Compose v2를 우선 사용, v1은 fallback
+    if docker compose version &> /dev/null; then
         COMPOSE_CMD="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        COMPOSE_CMD="docker-compose"
+        log_warn "Docker Compose v1이 감지되었습니다. v2 업그레이드를 권장합니다."
+    else
+        log_error "Docker Compose가 설치되지 않았습니다."
+        exit 1
     fi
     
     # 컨테이너 시작
@@ -270,11 +274,15 @@ show_usage() {
     log_info "📖 빌드된 컨테이너 사용법:"
     echo
     
-    # docker-compose 또는 docker compose 사용
-    if command -v docker-compose &> /dev/null; then
-        COMPOSE_CMD="docker-compose"
-    else
+    # Docker Compose v2를 우선 사용, v1은 fallback
+    if docker compose version &> /dev/null; then
         COMPOSE_CMD="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        COMPOSE_CMD="docker-compose"
+        log_warn "Docker Compose v1이 감지되었습니다. v2 업그레이드를 권장합니다."
+    else
+        log_error "Docker Compose가 설치되지 않았습니다."
+        exit 1
     fi
     
     if [[ $BUILD_TYPE == "gpu" ]] || [[ $BUILD_TYPE == "all" ]] || ([[ $BUILD_TYPE == "auto" ]] && check_nvidia_docker); then

@@ -1,14 +1,12 @@
-# GO## 🐳 Docker로 빠른 시작 (권장)
-
-**가장 쉬운 방법**: Docker를 사용하면 환경 설정 없이 바로 실행 가능!
-- **CPU 컨테이너**: 모든 환경에서 동작 (GOLdatagen_cpu.so)
-- **GPU 컨테이너**: NVIDIA GPU + Docker Runtime 필요 (GOLdatagen_gpu.so)p_pytorch
+# GOLexp_pytorch
 
 Game of Life 패턴을 PyTorch로 학습하는 복잡계 AI 실험 프로젝트
 
-## � Docker로 빠른 시작 (권장)
+## 🐳 Docker로 빠른 시작 (권장)
 
 **가장 쉬운 방법**: Docker를 사용하면 환경 설정 없이 바로 실행 가능!
+- **CPU 컨테이너**: 모든 환경에서 동작 (GOLdatagen_cpu.so)
+- **GPU 컨테이너**: NVIDIA GPU + Docker Runtime 필요 (GOLdatagen_gpu.so)
 
 ```bash
 # 1. 프로젝트 클론
@@ -16,12 +14,14 @@ git clone https://github.com/sungjeahyun100/GOLexp_pytroch.git
 cd GOLexp_pytroch
 
 # 2. Docker 환경 자동 구축
-./docker-setup.sh
-
-# 3. 컨테이너 실행 (GPU/CPU 자동 선택)
-docker-compose up -d golexp-gpu  # GPU가 있는 경우
+./docker-setup.sh          # Linux/macOS
 # 또는
-docker-compose up -d golexp-cpu  # GPU가 없는 경우
+.\docker-setup.ps1          # Windows (PowerShell)
+
+# 3. 컨테이너 실행 (Docker Compose v2)
+docker compose up -d golexp-gpu  # GPU가 있는 경우
+# 또는
+docker compose up -d golexp-cpu  # GPU가 없는 경우
 
 # 4. 컨테이너 접속 및 훈련 시작
 docker exec -it golexp-gpu bash  # GPU 컨테이너
@@ -63,7 +63,9 @@ cd GOLexp_pytroch
 
 # 2. Python 가상환경 설정
 python3 -m venv myexp
-source ./myexp/bin/activate
+source ./myexp/bin/activate    # Linux/macOS
+# 또는
+.\myexp\Scripts\Activate.ps1   # Windows PowerShell
 
 # 3. PyTorch 및 필수 라이브러리 설치
 pip3 install torch pygame numpy
@@ -74,12 +76,19 @@ cd build
 cmake ..              # CPU 전용 빌드
 # 또는
 cmake .. -DCUDA_ENABLED=ON  # GPU 지원 빌드 (CUDA 필요)
+
+# Linux/macOS
 make -j$(nproc)
+# Windows
+cmake --build . --config Release -j
+
 cd ..
 
 # 5. 데이터 생성
 mkdir train_data
-./genData.sh  # 자동으로 GPU/CPU 모드 선택 및 최적화된 라이브러리 사용
+./genData.sh          # Linux/macOS
+# Windows에서는 Python으로 직접 실행:
+# cd new_project && python datagen.py 54321 1000 0.3 --cpu
 
 # 6. 모델 훈련 시작
 cd new_project
