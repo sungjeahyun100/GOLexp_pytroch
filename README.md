@@ -28,6 +28,12 @@ docker exec -it golexp-gpu bash  # GPU 컨테이너
 # 또는  
 docker exec -it golexp-cpu bash  # CPU 컨테이너
 
+mkdir build
+cd build
+cmake ..              # CPU 전용 빌드
+# 또는
+cmake .. -DCUDA_ENABLED=ON  # GPU 지원 빌드 (CUDA 필요)
+
 # 5. 바로 훈련 시작! (데이터가 없는 경우 먼저 생성)
 ./genData.sh              # 99개 데이터셋 자동 생성 (컨테이너 내부)
 cd new_project
