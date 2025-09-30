@@ -1,6 +1,12 @@
 {
+  "_comment": "Game of Life 데이터셋 설정 파일",
+  "_version": "1.0",
+  "_last_updated": "2025-09-30",
+  "_description": "이 파일은 GoL CNN 모델 훈련용 데이터셋을 정의합니다",
+  
   "datasets": {
     "small_simulation": {
+      "_comment": "빠른 테스트용 소규모 데이터셋",
       "name": "Small Simulation Dataset (20K)",
       "type": "simulation_files",
       "paths": [
@@ -197,6 +203,7 @@
     }
   },
   "training_config": {
+    "_comment": "기본 훈련 설정값들",
     "default_batch_size": 32,
     "default_epochs": 50,
     "default_learning_rate": 0.001,
@@ -210,6 +217,7 @@
     ]
   },
   "custom_experiments": {
+    "_comment": "사전 정의된 실험 설정들 - train.py --experiment 옵션으로 사용",
     "my_experiment_1": {
       "name": "My Custom Experiment #1",
       "description": "사용자 정의 실험 템플릿 - 자유롭게 수정하세요",
@@ -252,11 +260,11 @@
     "my_custom_setup": {
       "name": "My Custom Setup",
       "description": "내 맞춤 설정 - 원하는 대로 수정하세요",
-      "dataset": "custom_mid_range",
+      "dataset": "full_simulation",
       "model": "custom",
       "training_params": {
-        "epochs": 40,
-        "batch_size": 24,
+        "epochs": 1000,
+        "batch_size": 100,
         "learning_rate": 0.0015,
         "optimizer": "AdamW"
       },

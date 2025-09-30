@@ -1,5 +1,5 @@
 services:
-  # GPU 지원 서비스
+  # GPU 지원 서비스 (X11 GUI 지원)
   golexp-gpu:
     build:
       context: .
@@ -10,13 +10,18 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
     volumes:
       - .:/app
       - ./train_data:/app/train_data
       - ./new_project/saved_models:/app/new_project/saved_models
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri
     working_dir: /app
     tty: true
     stdin_open: true
+    network_mode: "host"
     deploy:
       resources:
         reservations:
@@ -25,22 +30,28 @@ services:
               count: 1
               capabilities: [gpu]
 
-  # CPU 전용 서비스
+  # CPU 전용 서비스 (X11 GUI 지원)
   golexp-cpu:
     build:
       context: .
       dockerfile: Dockerfile.cpu
     image: golexp:cpu
     container_name: golexp-cpu
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
     volumes:
       - .:/app
       - ./train_data:/app/train_data
       - ./new_project/saved_models:/app/new_project/saved_models
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri
     working_dir: /app
     tty: true
     stdin_open: true
+    network_mode: "host"
 
-  # 개발 환경 (볼륨 마운트로 실시간 개발)
+  # 개발 환경 (볼륨 마운트로 실시간 개발 + X11 GUI)
   golexp-dev:
     build:
       context: .
@@ -51,9 +62,12 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
     volumes:
       - .:/app
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/dri:/dev/dri
     working_dir: /app
     tty: true
     stdin_open: true

@@ -1,6 +1,12 @@
 {
+  "_comment": "Game of Life CNN 모델 구조 설정 파일",
+  "_version": "1.0", 
+  "_last_updated": "2025-09-30",
+  "_description": "다양한 CNN 모델 아키텍처와 하이퍼파라미터 정의",
+  
   "model_configs": {
     "small_cnn": {
+      "_comment": "가장 빠른 훈련용 경량 모델",
       "name": "Small CNN Model",
       "input_size": 10,
       "hidden1_size": 16,
@@ -73,8 +79,8 @@
     "custom": {
       "name": "Custom User Model",
       "input_size": 10,
-      "hidden1_size": 32,
-      "hidden2_size": 64,
+      "hidden1_size": 64,
+      "hidden2_size": 128,
       "output_size": 10,
       "activation": "swish",
       "stride": 1,
@@ -86,6 +92,7 @@
     }
   },
   "activation_functions": {
+    "_comment": "지원되는 활성화 함수들과 설명",
     "relu": "ReLU - 일반적이고 빠른 활성화 함수",
     "swish": "Swish - 부드러운 곡선, 성능 우수",
     "tanh": "Tanh - 전통적인 S자 곡선",

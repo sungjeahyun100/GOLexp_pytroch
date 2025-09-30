@@ -44,6 +44,68 @@ python3 train.py --dataset small_simulation --epochs 50
 - **Docker 환경**: [DOCKER.md](DOCKER.md)  
 - **커스텀 데이터셋**: [DATASET_GUIDE.md](DATASET_GUIDE.md)
 
+## 🖥️ GUI 애플리케이션 실행 (pygame interface)
+
+**🚀 자동 GUI 설정** (권장):
+
+*Linux/macOS*:
+```bash
+# X11 포워딩 자동 설정
+./setup-gui.sh
+```
+
+*Windows (PowerShell)*:
+```powershell
+# VcXsrv 설정 및 GUI 환경 구성
+.\setup-gui.ps1
+```
+
+*공통*:
+```bash
+# GUI 지원 컨테이너 실행
+docker-compose up -d golexp-gpu  # 또는 golexp-cpu
+
+# pygame 인터페이스 실행
+docker exec -it golexp-gpu python3 new_project/interface.py
+```
+
+**🔧 수동 GUI 설정**:
+
+*Linux*:
+```bash
+xhost +local:docker  # X11 포워딩 허용
+docker-compose up -d golexp-gpu
+docker exec -it golexp-gpu python3 new_project/interface.py
+```
+
+*Windows (PowerShell 권장)*:
+```powershell
+# PowerShell 스크립트로 자동 설정
+.\setup-gui.ps1
+
+# 또는 수동 설정:
+# 1. VcXsrv 설치 및 실행 (Disable access control 체크)
+# 2. Windows IP 확인: ipconfig
+# 3. $env:DISPLAY = "윈도우IP:0.0"
+docker-compose up -d golexp-cpu
+docker exec -it golexp-cpu python3 new_project/interface.py
+```
+
+*macOS (XQuartz 필요)*:
+```bash
+# 1. XQuartz 설치: brew install --cask xquartz
+# 2. XQuartz 환경설정에서 네트워크 클라이언트 연결 허용
+export DISPLAY=host.docker.internal:0
+docker-compose up -d golexp-cpu
+docker exec -it golexp-cpu python3 new_project/interface.py
+```
+
+**🖥️ GUI 없는 환경 (헤드리스 모드)**:
+```bash
+# 모델 테스트만 (pygame GUI 없음)
+docker exec -it golexp-gpu python3 new_project/interface.py --headless
+```
+
 ---
 
 ## 📋 수동 설치 (필요한 것)
