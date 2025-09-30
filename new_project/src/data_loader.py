@@ -66,17 +66,15 @@ class GameOfLifeDataset(Dataset):
                             if label_line.isdigit():
                                 label = int(label_line)
                                 
-                                # 10x10을 50x50으로 확장 (중앙에 배치)
-                                expanded_pattern = np.zeros((50, 50), dtype=np.float32)
-                                start_row = (50 - 10) // 2  # 20
-                                start_col = (50 - 10) // 2  # 20
+                                # 10x10 원본 데이터 그대로 사용
+                                pattern_array = np.zeros((10, 10), dtype=np.float32)
                                 
                                 for row_idx, row in enumerate(pattern_lines):
                                     for col_idx, value in enumerate(row):
-                                        expanded_pattern[start_row + row_idx, start_col + col_idx] = float(value)
+                                        pattern_array[row_idx, col_idx] = float(value)
                                 
                                 # 데이터 저장
-                                file_data.append(expanded_pattern)
+                                file_data.append(pattern_array)
                                 file_labels.append(label)
                         
                         i += 12  # 다음 샘플로 이동 ([n] + 10줄 패턴 + 1줄 레이블)

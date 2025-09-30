@@ -81,8 +81,8 @@ class CNNLayer(nn.Module):
     
     def _calculate_fc_input_size(self, input_size, final_channels):
         """FC layer 입력 크기 계산"""
-        # 3번의 pooling (2x2)으로 8배 감소: 50x50 → 6x6
-        size_after_conv = max(1, input_size // 8)
+        # 풀링 제거: 입력 크기 그대로 유지 (padding=1이므로 conv 후에도 크기 동일)
+        size_after_conv = input_size
         self.fc_input_size = final_channels * size_after_conv * size_after_conv
     
     def forward(self, x):
@@ -90,10 +90,10 @@ class CNNLayer(nn.Module):
         if x.dim() == 3:
             x = x.unsqueeze(1)
         
-        # CNN 레이어들 (3개)
-        x = self.pool(get_activation(self.fc_act, self.bn1(self.conv1(x))))
-        x = self.pool(get_activation(self.fc_act, self.bn2(self.conv2(x))))
-        x = self.pool(get_activation(self.fc_act, self.bn3(self.conv3(x))))
+        # CNN 레이어들 (3개) - 풀링 제거
+        x = get_activation(self.fc_act, self.bn1(self.conv1(x)))
+        x = get_activation(self.fc_act, self.bn2(self.conv2(x)))
+        x = get_activation(self.fc_act, self.bn3(self.conv3(x)))
         
         # Flatten
         x = x.view(x.size(0), -1)

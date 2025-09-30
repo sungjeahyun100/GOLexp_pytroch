@@ -2,7 +2,7 @@
   "model_configs": {
     "small_cnn": {
       "name": "Small CNN Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 16,
       "hidden2_size": 32,
       "output_size": 10,
@@ -16,7 +16,7 @@
     },
     "standard_cnn": {
       "name": "Standard CNN Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 32,
       "hidden2_size": 64,
       "output_size": 10,
@@ -30,7 +30,7 @@
     },
     "large_cnn": {
       "name": "Large CNN Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 64,
       "hidden2_size": 128,
       "output_size": 10,
@@ -44,7 +44,7 @@
     },
     "experimental_relu": {
       "name": "Experimental ReLU Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 48,
       "hidden2_size": 96,
       "output_size": 10,
@@ -58,7 +58,7 @@
     },
     "lightweight": {
       "name": "Ultra Lightweight Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 8,
       "hidden2_size": 16,
       "output_size": 10,
@@ -72,7 +72,7 @@
     },
     "custom": {
       "name": "Custom User Model",
-      "input_size": 50,
+      "input_size": 10,
       "hidden1_size": 32,
       "hidden2_size": 64,
       "output_size": 10,

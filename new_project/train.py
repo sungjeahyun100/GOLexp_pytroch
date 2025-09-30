@@ -305,8 +305,8 @@ def main():
             print(f"   활성화: {model_config['activation']}, bias: {model_config['use_bias']}")
     else:
         # 수동 설정 사용 (기본값 또는 명령행 인자)
-        model_config = {
-            'input_size': 50,
+        default_config = {
+            'input_size': 10,
             'hidden1_size': args.hidden1,
             'hidden2_size': args.hidden2,
             'output_size': 10,
