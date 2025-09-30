@@ -142,6 +142,56 @@
         50,
         50
       ]
+    },
+    "custom_experiment_1": {
+      "name": "Custom Quick Test (3K samples)",
+      "type": "simulation_files",
+      "paths": [
+        "database-54321_1000_0.100000.txt",
+        "database-54321_1000_0.300000.txt",
+        "database-54321_1000_0.500000.txt"
+      ],
+      "description": "빠른 테스트용 - 저중고 밀도 패턴 (0.1, 0.3, 0.5)",
+      "expected_samples": 3000,
+      "grid_size": [50, 50]
+    },
+    "custom_high_density": {
+      "name": "Custom High Density Dataset (3K)",
+      "type": "simulation_files", 
+      "paths": [
+        "database-54321_1000_0.700000.txt",
+        "database-54321_1000_0.800000.txt",
+        "database-54321_1000_0.900000.txt"
+      ],
+      "description": "고밀도 패턴 실험용 (생존율 0.7-0.9)",
+      "expected_samples": 3000,
+      "grid_size": [50, 50]
+    },
+    "custom_low_density": {
+      "name": "Custom Low Density Dataset (3K)",
+      "type": "simulation_files",
+      "paths": [
+        "database-54321_1000_0.050000.txt",
+        "database-54321_1000_0.100000.txt", 
+        "database-54321_1000_0.150000.txt"
+      ],
+      "description": "저밀도 패턴 실험용 (생존율 0.05-0.15)",
+      "expected_samples": 3000,
+      "grid_size": [50, 50]
+    },
+    "custom_mid_range": {
+      "name": "Custom Mid-Range Dataset (5K)",
+      "type": "simulation_files",
+      "paths": [
+        "database-54321_1000_0.250000.txt",
+        "database-54321_1000_0.350000.txt",
+        "database-54321_1000_0.450000.txt",
+        "database-54321_1000_0.550000.txt",
+        "database-54321_1000_0.650000.txt"
+      ],
+      "description": "중간 밀도 패턴 실험용 (생존율 0.25-0.65)",
+      "expected_samples": 5000,
+      "grid_size": [50, 50]
     }
   },
   "training_config": {
@@ -156,5 +206,59 @@
       "../../train_data",
       "./train_data"
     ]
+  },
+  "custom_experiments": {
+    "my_experiment_1": {
+      "name": "My Custom Experiment #1",
+      "description": "사용자 정의 실험 템플릿 - 자유롭게 수정하세요",
+      "dataset": "custom_experiment_1",
+      "model": "standard_cnn",
+      "training_params": {
+        "epochs": 30,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "AdamW"
+      },
+      "notes": "빠른 프로토타이핑용 설정"
+    },
+    "high_accuracy_experiment": {
+      "name": "High Accuracy Experiment",
+      "description": "고정밀도 실험 - 대형 모델 + 고밀도 데이터",
+      "dataset": "custom_high_density",
+      "model": "large_cnn",
+      "training_params": {
+        "epochs": 70,
+        "batch_size": 16,
+        "learning_rate": 0.0005,
+        "optimizer": "AdamW"
+      },
+      "notes": "높은 정확도가 필요한 정밀 분석용"
+    },
+    "quick_test": {
+      "name": "Quick Test Experiment",
+      "description": "빠른 테스트용 - 경량 모델 + 소규모 데이터",
+      "dataset": "custom_experiment_1",
+      "model": "lightweight",
+      "training_params": {
+        "epochs": 10,
+        "batch_size": 64,
+        "learning_rate": 0.005,
+        "optimizer": "AdamW"
+      },
+      "notes": "빠른 검증 및 디버깅용"
+    },
+    "my_custom_setup": {
+      "name": "My Custom Setup",
+      "description": "내 맞춤 설정 - 원하는 대로 수정하세요",
+      "dataset": "custom_mid_range",
+      "model": "custom",
+      "training_params": {
+        "epochs": 40,
+        "batch_size": 24,
+        "learning_rate": 0.0015,
+        "optimizer": "AdamW"
+      },
+      "notes": "사용자 정의 실험 설정"
+    }
   }
 }

@@ -1,0 +1,104 @@
+{
+  "model_configs": {
+    "small_cnn": {
+      "name": "Small CNN Model",
+      "input_size": 50,
+      "hidden1_size": 16,
+      "hidden2_size": 32,
+      "output_size": 10,
+      "activation": "relu",
+      "stride": 1,
+      "use_bias": false,
+      "description": "가벼운 모델 - 빠른 테스트용",
+      "recommended_epochs": 30,
+      "recommended_lr": 0.001,
+      "recommended_batch_size": 64
+    },
+    "standard_cnn": {
+      "name": "Standard CNN Model",
+      "input_size": 50,
+      "hidden1_size": 32,
+      "hidden2_size": 64,
+      "output_size": 10,
+      "activation": "swish",
+      "stride": 1,
+      "use_bias": false,
+      "description": "표준 모델 - 균형잡힌 성능",
+      "recommended_epochs": 50,
+      "recommended_lr": 0.001,
+      "recommended_batch_size": 32
+    },
+    "large_cnn": {
+      "name": "Large CNN Model",
+      "input_size": 50,
+      "hidden1_size": 64,
+      "hidden2_size": 128,
+      "output_size": 10,
+      "activation": "swish",
+      "stride": 1,
+      "use_bias": false,
+      "description": "대형 모델 - 높은 정확도 추구",
+      "recommended_epochs": 70,
+      "recommended_lr": 0.0005,
+      "recommended_batch_size": 16
+    },
+    "experimental_relu": {
+      "name": "Experimental ReLU Model",
+      "input_size": 50,
+      "hidden1_size": 48,
+      "hidden2_size": 96,
+      "output_size": 10,
+      "activation": "relu",
+      "stride": 1,
+      "use_bias": true,
+      "description": "ReLU 활성화 실험용 (bias 포함)",
+      "recommended_epochs": 60,
+      "recommended_lr": 0.002,
+      "recommended_batch_size": 24
+    },
+    "lightweight": {
+      "name": "Ultra Lightweight Model",
+      "input_size": 50,
+      "hidden1_size": 8,
+      "hidden2_size": 16,
+      "output_size": 10,
+      "activation": "relu",
+      "stride": 1,
+      "use_bias": false,
+      "description": "극경량 모델 - 매우 빠른 훈련",
+      "recommended_epochs": 100,
+      "recommended_lr": 0.005,
+      "recommended_batch_size": 128
+    },
+    "custom": {
+      "name": "Custom User Model",
+      "input_size": 50,
+      "hidden1_size": 32,
+      "hidden2_size": 64,
+      "output_size": 10,
+      "activation": "swish",
+      "stride": 1,
+      "use_bias": false,
+      "description": "사용자 정의 모델 - 자유롭게 수정 가능",
+      "recommended_epochs": 50,
+      "recommended_lr": 0.001,
+      "recommended_batch_size": 32
+    }
+  },
+  "activation_functions": {
+    "relu": "ReLU - 일반적이고 빠른 활성화 함수",
+    "swish": "Swish - 부드러운 곡선, 성능 우수",
+    "tanh": "Tanh - 전통적인 S자 곡선",
+    "sigmoid": "Sigmoid - 0-1 범위 출력",
+    "elu": "ELU - 음수 영역 부드러운 곡선",
+    "selu": "SELU - 자체 정규화 효과",
+    "lrelu": "Leaky ReLU - 음수 영역 완만한 기울기"
+  },
+  "model_usage_guide": {
+    "small_models": "hidden1 <= 32, hidden2 <= 64 - 빠른 실험용",
+    "medium_models": "hidden1: 32-64, hidden2: 64-128 - 일반적인 성능",
+    "large_models": "hidden1 >= 64, hidden2 >= 128 - 고성능 요구시",
+    "bias_usage": "복잡한 패턴 학습시 use_bias: true 권장",
+    "stride_note": "현재 stride=1만 지원 (stride=2는 모델 구조 수정 필요)"
+  }
+}

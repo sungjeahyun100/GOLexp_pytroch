@@ -34,7 +34,9 @@ cd new_project
 python3 train.py --dataset small_simulation --epochs 50
 ```
 
-📖 **자세한 Docker 사용법**: [DOCKER.md](DOCKER.md) 참조
+📖 **자세한 사용법**: 
+- **Docker 환경**: [DOCKER.md](DOCKER.md)  
+- **커스텀 데이터셋**: [DATASET_GUIDE.md](DATASET_GUIDE.md)
 
 ---
 
