@@ -7,6 +7,7 @@ torchaudio>=2.0.0+cpu
 # Core dependencies
 numpy>=1.21.0
 matplotlib>=3.5.0
+pygame>=2.5.0
 
 # Optional but recommended
 scipy>=1.9.0

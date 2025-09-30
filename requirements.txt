@@ -7,11 +7,9 @@ torchaudio>=2.0.0
 # Core dependencies
 numpy>=1.21.0
 matplotlib>=3.5.0
+pygame>=2.5.0
 
 # Optional but recommended
-scipy>=1.7.0
-pillow>=8.3.0
-tqdm>=4.64.0
-argparse
-Pillow>=9.0.0
 scipy>=1.9.0
+pillow>=9.0.0
+tqdm>=4.64.0

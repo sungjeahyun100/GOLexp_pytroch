@@ -1,23 +1,20 @@
-# CPU-Only Dockerfile - PyTorch CPU 버전
-FROM ubuntu:22.04
+# CPU-Only Dockerfile - Python 슬림 베이스 이미지 사용
+FROM python:3.10-slim-bullseye
 
 # 환경 변수 설정
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# 시스템 패키지 업데이트 및 필수 도구 설치
+# 필수 패키지 및 X11 클라이언트 설치 (GUI 지원용)
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
     build-essential \
     cmake \
     git \
-    wget \
-    curl \
-    gcc \
-    g++ \
-    ninja-build \
+    libx11-6 \
+    libxext6 \
+    libxrender1 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성 설치 (CPU 버전)
