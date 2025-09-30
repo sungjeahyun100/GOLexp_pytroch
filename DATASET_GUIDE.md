@@ -53,7 +53,7 @@ python3 train.py --dataset my_experiment --model-config large_cnn --epochs 30
   "type": "simulation_files",           // 고정값
   "paths": ["파일1.txt", "파일2.txt"],    // 데이터 파일 목록
   "description": "데이터셋 설명",
-  "expected_samples": 총샘플수,          // 예상 총 샘플 개수
+  "expected_samples": "총샘플수",          // 예상 총 샘플 개수
   "grid_size": [50, 50]                // 입력 그리드 크기 (고정)
 }
 ```
