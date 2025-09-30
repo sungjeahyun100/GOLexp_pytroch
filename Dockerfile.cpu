@@ -30,10 +30,10 @@ WORKDIR /app
 # 프로젝트 파일 복사
 COPY . .
 
-# CMake 빌드 (CUDA 없이)
+# CMake 빌드 (CUDA 없이, CPU 전용)
 RUN mkdir -p build && cd build \
-    && cmake -DUSE_CUDA=OFF .. \
-    && make -j$(nproc) || echo "Note: Some CUDA components skipped in CPU-only build"
+    && CMAKE_CUDA_COMPILER="" CUDAToolkit_ROOT="" cmake .. \
+    && make -j$(nproc)
 
 # 권한 설정
 RUN chmod +x /app/genData.sh || true

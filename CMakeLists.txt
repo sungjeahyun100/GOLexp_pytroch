@@ -155,29 +155,45 @@ else()
 endif()
 
 
+# 항상 CPU 버전 라이브러리 생성
+add_library(GOLdatagen_cpu SHARED 
+    CUDAcode/GOLdatagen.cpp 
+    CUDAcode/GOLdatabase_host.cpp
+)
+target_link_libraries(GOLdatagen_cpu Threads::Threads)
+target_compile_features(GOLdatagen_cpu PRIVATE cxx_std_20)
+target_include_directories(GOLdatagen_cpu PRIVATE CUDAcode)
+target_compile_definitions(GOLdatagen_cpu PRIVATE CPU_ONLY)
+target_compile_options(GOLdatagen_cpu PRIVATE -Wall -Wextra -O3)
+set_target_properties(GOLdatagen_cpu PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    PREFIX ""
+)
+message(STATUS "Added CPU GOLdatagen shared library")
+
+# CUDA 지원시에만 GPU 버전 라이브러리 생성
 if(USE_CUDA)
     if(EXISTS "${CMAKE_SOURCE_DIR}/CUDAcode/GOLdatagen.cu")
-        # 공유 라이브러리(.so) 생성
-        add_library(GOLdatagen SHARED CUDAcode/GOLdatagen.cu)
+        # GPU 공유 라이브러리(.so) 생성
+        add_library(GOLdatagen_gpu SHARED CUDAcode/GOLdatagen.cu)
         set_source_files_properties(CUDAcode/GOLdatagen.cu PROPERTIES LANGUAGE CUDA)
         
         # 라이브러리 링크
-        target_link_libraries(GOLdatagen exp_GOLdatagen_dependency)
+        target_link_libraries(GOLdatagen_gpu exp_GOLdatagen_dependency)
         
         # 컴파일 옵션 설정
-        target_compile_features(GOLdatagen PRIVATE cuda_std_17)
-        target_include_directories(GOLdatagen PRIVATE CUDAcode)
+        target_compile_features(GOLdatagen_gpu PRIVATE cuda_std_17)
+        target_include_directories(GOLdatagen_gpu PRIVATE CUDAcode)
+        target_compile_definitions(GOLdatagen_gpu PRIVATE CUDA_ENABLED)
         
         # 위치 독립적 코드 활성화 (공유 라이브러리에 필요)
-        set_target_properties(GOLdatagen PROPERTIES 
+        set_target_properties(GOLdatagen_gpu PROPERTIES 
             POSITION_INDEPENDENT_CODE ON
             PREFIX ""  # lib 접두사 제거 (선택사항)
         )
         
-        message(STATUS "Added GOLdatagen shared library")
+        message(STATUS "Added GPU GOLdatagen shared library")
     else()
-        message(STATUS "GOLdatagen shared library skipped (source not found)")
+        message(STATUS "GPU GOLdatagen shared library skipped (source not found)")
     endif()
-else()
-    message(STATUS "GOLdatagen shared library skipped (requires CUDA)")
 endif()

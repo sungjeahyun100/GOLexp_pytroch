@@ -4,20 +4,31 @@ import os
 import argparse
 import sys
 
-def find_library():
+def find_library(cpu_mode=False):
     """공유 라이브러리를 여러 경로에서 찾기"""
-    possible_paths = [
-        '../build/GOLdatagen.so',
-        './build/GOLdatagen.so', 
-        'build/GOLdatagen.so',
-        os.path.join(os.path.dirname(__file__), '..', 'build', 'GOLdatagen.so')
-    ]
+    if cpu_mode:
+        # CPU 모드용 라이브러리 경로
+        possible_paths = [
+            '../build/GOLdatagen_cpu.so',
+            './build/GOLdatagen_cpu.so', 
+            'build/GOLdatagen_cpu.so',
+            os.path.join(os.path.dirname(__file__), '..', 'build', 'GOLdatagen_cpu.so')
+        ]
+    else:
+        # GPU 모드용 라이브러리 경로
+        possible_paths = [
+            '../build/GOLdatagen_gpu.so',
+            './build/GOLdatagen_gpu.so', 
+            'build/GOLdatagen_gpu.so',
+            os.path.join(os.path.dirname(__file__), '..', 'build', 'GOLdatagen_gpu.so')
+        ]
     
     for path in possible_paths:
         if os.path.exists(path):
             return path
     
-    print("❌ 공유 라이브러리를 찾을 수 없습니다!")
+    mode_str = "CPU" if cpu_mode else "GPU"
+    print(f"❌ {mode_str} 공유 라이브러리를 찾을 수 없습니다!")
     print("다음 경로들을 확인했습니다:")
     for path in possible_paths:
         print("  - " + os.path.abspath(path))
@@ -26,31 +37,44 @@ def find_library():
     print("2. CUDA가 없는 경우 --cpu 옵션 사용")
     return None
 
-# 공유 라이브러리 로드 (안전한 방식)
-lib_path = find_library()
-if lib_path is None:
-    print("⚠️  GPU 라이브러리를 사용할 수 없습니다. --cpu 옵션을 사용하세요.")
-    lib = None
-else:
-    try:
-        lib = ct.CDLL(lib_path)
-        print("✅ 라이브러리 로드 성공: " + lib_path)
-    except Exception as e:
-        print("❌ 라이브러리 로드 실패: " + str(e))
-        lib = None
+# 전역 변수로 lib 초기화 (나중에 main에서 설정)
+lib = None
+cpu_lib = None
+gpu_lib = None
 
-# 함수 시그니처 설정 (라이브러리가 로드된 경우만)
-if lib is not None:
-    lib.genGOLdata.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
-    lib.genGOLdata.restype = None
+def setup_cpu_library_functions(library):
+    """CPU 라이브러리 함수 시그니처 설정"""
+    if library is not None:
+        # CPU 전용 호스트 데이터 생성
+        library.genGOLdataInHost.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdataInHost.restype = None
 
-    lib.genGOLdataInOneFile.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
-    lib.genGOLdataInOneFile.restype = None
+        # CPU 전용 단일파일 데이터 생성
+        library.genGOLdataInOneFile.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdataInOneFile.restype = None
+        
+        # CPU 패턴 예측 함수
+        library.getPredict.argtypes = [ct.POINTER(ct.c_int)]
+        library.getPredict.restype = ct.c_int
 
-    lib.genGOLdataInHost.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
-    lib.genGOLdataInHost.restype = None
+def setup_gpu_library_functions(library):
+    """GPU 라이브러리 함수 시그니처 설정"""
+    if library is not None:
+        # GPU 멀티파일 데이터 생성
+        library.genGOLdata.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdata.restype = None
+
+        # GPU 단일파일 데이터 생성
+        library.genGOLdataInOneFile.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdataInOneFile.restype = None
+        
+        # GPU 패턴 예측 함수
+        library.getPredict.argtypes = [ct.POINTER(ct.c_int)]
+        library.getPredict.restype = ct.c_int
 
 def main():
+    global lib, cpu_lib, gpu_lib
+    
     parser = argparse.ArgumentParser(description='Game of Life 데이터 생성기')
     parser.add_argument('param1', type=int, help='첫 번째 매개변수 (uint32)')
     parser.add_argument('param2', type=int, help='두 번째 매개변수 (uint32)')
@@ -69,40 +93,59 @@ def main():
         if args.output:
             print("출력 디렉토리: " + args.output)
     
-    # 라이브러리 로드 확인
-    if lib is None:
-        print("❌ C++ 라이브러리를 사용할 수 없습니다!")
-        print("해결 방법:")
-        print("1. 프로젝트 빌드: mkdir build && cd build && cmake .. && make")
-        print("2. 또는 Docker 사용: docker-compose up golexp-cpu")
-        return 1
+    # CPU 모드인지 GPU 모드인지에 따라 다른 라이브러리 로드
+    if args.cpu:
+        # CPU 모드: cpu 라이브러리 로드
+        cpu_lib_path = find_library(cpu_mode=True)
+        if cpu_lib_path is None:
+            print("❌ CPU 라이브러리를 사용할 수 없습니다!")
+            return 1
+        try:
+            cpu_lib = ct.CDLL(cpu_lib_path)
+            setup_cpu_library_functions(cpu_lib)
+            lib = cpu_lib  # 현재 사용할 라이브러리 설정
+            print("✅ 라이브러리 로드 성공: " + cpu_lib_path)
+        except Exception as e:
+            print("❌ CPU 라이브러리 로드 실패: " + str(e))
+            return 1
+    else:
+        # GPU 모드: gpu 라이브러리 로드
+        gpu_lib_path = find_library(cpu_mode=False)
+        if gpu_lib_path is None:
+            print("❌ GPU 라이브러리를 사용할 수 없습니다!")
+            print("💡 --cpu 옵션을 사용하여 CPU 모드로 시도해보세요.")
+            return 1
+        try:
+            gpu_lib = ct.CDLL(gpu_lib_path)
+            setup_gpu_library_functions(gpu_lib)
+            lib = gpu_lib  # 현재 사용할 라이브러리 설정
+            print("✅ 라이브러리 로드 성공: " + gpu_lib_path)
+        except Exception as e:
+            print("❌ GPU 라이브러리 로드 실패: " + str(e))
+            print("💡 --cpu 옵션을 사용하여 CPU 모드로 시도해보세요.")
+            return 1
     
     # C 라이브러리 함수 호출
     if args.cpu:
+        # CPU 모드: genGOLdataInHost 또는 genGOLdataInOneFile 사용
         try:
-            print("🔧 CPU 모드로 데이터 생성 중...")
-            lib.genGOLdataInHost(args.param1, args.param2, args.param3)
-            print("✅ CPU 데이터 생성 완료!")
+            if args.one_file:
+                lib.genGOLdataInOneFile(args.param1, args.param2, args.param3)
+            else:
+                lib.genGOLdataInHost(args.param1, args.param2, args.param3)
         except Exception as e:
             print("❌ CPU 모드 오류: " + str(e))
             return 1
     else:
-        if args.one_file:
-           try:
-               print("📁 단일 파일 모드로 데이터 생성 중...")
+        # GPU 모드: genGOLdata 또는 genGOLdataInOneFile 사용
+        try:
+            if args.one_file:
                lib.genGOLdataInOneFile(args.param1, args.param2, args.param3)
-               print("✅ 단일 파일 데이터 생성 완료!")
-           except Exception as e:
-               print("❌ 단일 파일 모드 오류: " + str(e))
-               return 1
-        else:
-           try:
-               print("🚀 GPU 모드로 데이터 생성 중...")
+            else:
                lib.genGOLdata(args.param1, args.param2, args.param3)
-               print("✅ GPU 데이터 생성 완료!")
-           except Exception as e:
-               print("❌ GPU 모드 오류: " + str(e))
-               return 1
+        except Exception as e:
+            print("❌ GPU 모드 오류: " + str(e))
+            return 1
         
         return 0
 

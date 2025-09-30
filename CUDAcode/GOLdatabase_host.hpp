@@ -11,8 +11,8 @@
 
 namespace GOL_2_H{
     constexpr int MAXGEN = 2500;
-    constexpr int BOARDHEIGHT = 90;
-    constexpr int BOARDWIDTH = 90;
+    constexpr int BOARDHEIGHT = 100;
+    constexpr int BOARDWIDTH = 100;
 
     constexpr int HEIGHT = 10;
     constexpr int WIDTH = 10;

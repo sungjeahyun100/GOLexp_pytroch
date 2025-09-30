@@ -142,6 +142,9 @@ int GOL_2_H::simulateAndLabel(const std::vector<int>& init_pattern)
 
 void GOL_2_H::generateGameOfLifeDataInHost(dataset_id data_config)
 {
+    // train_data 디렉토리 생성 (존재하지 않으면)
+    std::filesystem::create_directories("../train_data");
+    
     std::string datasetName = "../train_data/" + getDatasetId(data_config);
     int totalFiles = data_config.sample_quantity;
     double aliveRatio = data_config.alive_ratio;
@@ -164,6 +167,7 @@ void GOL_2_H::generateGameOfLifeDataInHost(dataset_id data_config)
     std::ofstream fout(datasetName + ".txt");
     if (!fout.is_open()) {
         std::cerr << "❌ 파일 생성 실패: " << datasetName << ".txt" << std::endl;
+        std::cerr << "💡 디렉토리 권한을 확인하세요: ../train_data/" << std::endl;
         return;
     }
     

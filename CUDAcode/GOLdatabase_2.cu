@@ -288,7 +288,11 @@ namespace GOL_2 {
         int* d_curr = initialPattern.getDevPointer();
         int* d_next = nullptr;
         int* d_alt  = nullptr; // always points to allocated buffer to free later
-        cudaMallocAsync(&d_alt, sizeof(int) * H * W, str);
+        cudaError_t err = cudaMalloc(&d_alt, sizeof(int) * H * W);
+        if (err != cudaSuccess) {
+            std::cerr << "CUDA malloc failed: " << cudaGetErrorString(err) << std::endl;
+            return -1;
+        }
         d_next = d_alt;
 
         std::deque<int> history; // 최근 50개 alive 수 저장
@@ -338,7 +342,9 @@ namespace GOL_2 {
             cudaStreamSynchronize(str);
         }
 
-        if (d_alt) cudaFreeAsync(d_alt, str);
+        if (d_alt) {
+            cudaFree(d_alt);
+        }
         cudaStreamSynchronize(str);
         return final_alive;
     }
@@ -350,7 +356,11 @@ namespace GOL_2 {
         int* d_curr = initialPattern.getDevPointer();
         int* d_next = nullptr;
         int* d_alt  = nullptr;
-        cudaMallocAsync(&d_alt, sizeof(int) * H * W, str);
+        cudaError_t err = cudaMalloc(&d_alt, sizeof(int) * H * W);
+        if (err != cudaSuccess) {
+            std::cerr << "CUDA malloc failed: " << cudaGetErrorString(err) << std::endl;
+            return d_matrix_2<int>(1, 1, str);
+        }
         d_next = d_alt;
 
         std::deque<int> history; // 최근 50개 alive 수 저장
@@ -394,7 +404,9 @@ namespace GOL_2 {
         cudaMemcpyAsync(final_board.getDevPointer(), d_curr, sizeof(int) * H * W, cudaMemcpyDeviceToDevice, str);
         cudaStreamSynchronize(str);
 
-        if (d_alt) cudaFreeAsync(d_alt, str);
+        if (d_alt) {
+            cudaFree(d_alt);
+        }
         cudaStreamSynchronize(str);
         return final_board;
     }
@@ -407,7 +419,11 @@ namespace GOL_2 {
         int* d_curr = initialPattern.getDevPointer();
         int* d_next = nullptr;
         int* d_alt  = nullptr;
-        cudaMallocAsync(&d_alt, sizeof(int) * H * W, str);
+        cudaError_t err = cudaMalloc(&d_alt, sizeof(int) * H * W);
+        if (err != cudaSuccess) {
+            std::cerr << "CUDA malloc failed: " << cudaGetErrorString(err) << std::endl;
+            return {d_matrix_2<int>(1, 1, str), -1};
+        }
         d_next = d_alt;
 
         std::deque<int> history; // 최근 50개 alive 수 저장
@@ -472,7 +488,9 @@ namespace GOL_2 {
         cudaMemcpyAsync(final_board.getDevPointer(), d_curr, sizeof(int) * H * W, cudaMemcpyDeviceToDevice, str);
         cudaStreamSynchronize(str);
 
-    if (d_alt) cudaFreeAsync(d_alt, str);
+        if (d_alt) {
+            cudaFree(d_alt);
+        }
         cudaStreamSynchronize(str);
         return {std::move(final_board), final_count};
     }
