@@ -28,7 +28,8 @@ docker exec -it golexp-gpu bash  # GPU 컨테이너
 # 또는  
 docker exec -it golexp-cpu bash  # CPU 컨테이너
 
-# 5. 바로 훈련 시작!
+# 5. 바로 훈련 시작! (데이터가 없는 경우 먼저 생성)
+./genData.sh              # 99개 데이터셋 자동 생성 (컨테이너 내부)
 cd new_project
 python3 train.py --dataset small_simulation --epochs 50
 ```
@@ -87,7 +88,8 @@ cd ..
 # 5. 데이터 생성
 mkdir train_data
 ./genData.sh          # Linux/macOS
-# Windows에서는 Python으로 직접 실행:
+.\genData.ps1         # Windows (PowerShell)
+# 또는 Python으로 직접 실행:
 # cd new_project && python datagen.py 54321 1000 0.3 --cpu
 
 # 6. 모델 훈련 시작
