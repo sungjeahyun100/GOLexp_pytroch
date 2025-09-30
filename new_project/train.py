@@ -7,6 +7,7 @@ Game of Life CNN 모델 훈련 스크립트 (간소화 버전)
     python3 train.py --files ../train_data/*.txt --epochs 20
 """
 import argparse
+import os
 import sys
 import time
 import torch
@@ -15,6 +16,21 @@ import torch.optim as optim
 
 from src.data_loader import DatasetLoader, load_dataset_from_files
 from src.model import CNNLayer, save_model, device
+
+def find_config_file(filename):
+    """설정 파일을 찾는 단순화된 함수"""
+    # 1. 현재 디렉토리
+    if os.path.exists(filename):
+        return filename
+    
+    # 2. 스크립트와 같은 디렉토리
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, filename)
+    if os.path.exists(config_path):
+        return config_path
+    
+    # 3. 기본값으로 현재 디렉토리의 파일명 반환
+    return filename
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Game of Life CNN 훈련')
@@ -81,8 +97,9 @@ def main():
     
     # 데이터 로딩
     if args.dataset:
-        # JSON 설정 사용
-        loader = DatasetLoader("dataset_config.json")
+        # JSON 설정 사용 - config 파일 경로 자동 탐지
+        config_path = find_config_file("dataset_config.json")
+        loader = DatasetLoader(config_path)
         dataloader = loader.create_dataloader(
             args.dataset, 
             batch_size=args.batch_size,

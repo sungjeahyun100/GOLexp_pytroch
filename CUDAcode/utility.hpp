@@ -6,6 +6,9 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <filesystem>
+#include <iomanip>
+#include <sstream>
 
 struct dataset_id{
     uint32_t seed;
@@ -48,6 +51,27 @@ inline void printProgressBar(int current, int total, std::chrono::steady_clock::
     std::cout << '[' << processname << ']';
     std::cout << "(경과 시간: " << elapsedSec << " ms)                      \r";
     std::cout.flush();
+}
+
+inline std::string findProjectRoot() {
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    
+    // 최대 5단계까지 상위 디렉토리 확인
+    for (int i = 0; i < 5; i++) {
+        // train_data 폴더나 CMakeLists.txt가 있으면 프로젝트 루트로 간주
+        if (std::filesystem::exists(currentPath / "train_data") || 
+            std::filesystem::exists(currentPath / "CMakeLists.txt") ||
+            std::filesystem::exists(currentPath / ".git")) {
+            return currentPath.string();
+        }
+        
+        std::filesystem::path parent = currentPath.parent_path();
+        if (parent == currentPath) break; // 루트 디렉토리 도달
+        currentPath = parent;
+    }
+    
+    // 찾지 못한 경우 현재 디렉토리 반환
+    return std::filesystem::current_path().string();
 }
 
 

@@ -508,7 +508,8 @@ namespace GOL_2 {
         cudaStream_t stream;
         cudaStreamCreate(&stream);
 
-        std::string datasetPath = "../" + getDatasetId(info) + "/";
+        std::string projectRoot = findProjectRoot();
+        std::string datasetPath = projectRoot + "/" + getDatasetId(info) + "/";
 
         
         if (fs::exists(datasetPath)) {
@@ -606,12 +607,20 @@ namespace GOL_2 {
         cudaStream_t stream;
         cudaStreamCreate(&stream);
 
-        std::string datasetName = "../train_data/" + getDatasetId(info);
+        std::string projectRoot = findProjectRoot();
+        std::string trainDataPath = projectRoot + "/train_data";
+        std::string datasetName = getDatasetId(info);
+
+        if (fs::exists(trainDataPath)) {
+            std::cout << "[INFO] Dataset directory already exists: " << trainDataPath << std::endl;
+        } else {
+            fs::create_directories(trainDataPath);
+        }
 
         int totalFiles = filenum;
         double aliveratio = ratio;
 
-        std::cout << "totalData:" << totalFiles << " (file name: " << datasetName << ")" << std::endl;
+        std::cout << "totalData:" << totalFiles << " (file name: " << trainDataPath + "/" + datasetName << ")" << std::endl;
         std::cout << "aliveratio:" << aliveratio << std::endl;
         std::cout << "max generation:" << MAXGEN << std::endl;
         std::cout << "pattern size:" << HEIGHT << " * " << WIDTH << std::endl;
@@ -623,7 +632,7 @@ namespace GOL_2 {
         std::mt19937_64 global_gen(static_cast<uint64_t>(seed));
         std::uniform_int_distribution<int> offset_dist(0, std::numeric_limits<int>::max());
 
-        std::ofstream fout(datasetName + ".txt");
+        std::ofstream fout(trainDataPath + "/" + datasetName + ".txt");
 
         for (int fileId = 1; fileId <= totalFiles; ++fileId) {
             // 각 샘플에 대해 고유하지만 결정적인 시드를 생성

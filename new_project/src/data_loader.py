@@ -113,31 +113,39 @@ class DatasetLoader:
         self.config = {}
         self.load_config()
     
-    def _find_git_or_project_root(self, start_path: str) -> Optional[str]:
-        """Git 루트나 프로젝트 루트 디렉토리를 찾습니다"""
-        current = os.path.abspath(start_path)
+    def _resolve_file_path(self, path: str) -> str:
+        """파일 경로를 해결하는 단순화된 방식"""
+        if os.path.isabs(path):
+            # 절대 경로인 경우 그대로 사용
+            return path
         
-        # 최대 5단계까지 상위 디렉토리로 이동
-        for _ in range(5):
-            # .git 폴더가 있는지 확인
-            if os.path.exists(os.path.join(current, '.git')):
-                return current
-                
-            # train_data 폴더가 있는지 확인 (프로젝트 루트 표시)
-            if os.path.exists(os.path.join(current, 'train_data')):
-                return current
-                
-            # CMakeLists.txt나 README.md가 있으면 프로젝트 루트로 간주
-            if (os.path.exists(os.path.join(current, 'CMakeLists.txt')) or 
-                os.path.exists(os.path.join(current, 'README.md'))):
-                return current
+        # 상대 경로인 경우 3단계로만 시도
+        # 1. 현재 작업 디렉토리 기준
+        abs_path1 = os.path.join(os.getcwd(), path)
+        if os.path.exists(abs_path1):
+            return abs_path1
             
+        # 2. config 파일 기준
+        config_dir = os.path.dirname(os.path.abspath(self.config_path))
+        abs_path2 = os.path.join(config_dir, path)
+        if os.path.exists(abs_path2):
+            return abs_path2
+            
+        # 3. 프로젝트 루트의 train_data 폴더에서 파일명으로 찾기
+        filename = os.path.basename(path)
+        current = os.getcwd()
+        for _ in range(3):  # 최대 3단계 상위까지
+            train_data_path = os.path.join(current, 'train_data', filename)
+            if os.path.exists(train_data_path):
+                return train_data_path
             parent = os.path.dirname(current)
-            if parent == current:  # 루트 디렉토리에 도달
+            if parent == current:
                 break
             current = parent
         
-        return None
+        # 파일을 찾지 못한 경우 첫 번째 경로를 기본값으로 반환
+        print("❌ 파일을 찾을 수 없습니다: {}".format(path))
+        return abs_path1
     
     def load_config(self):
         """JSON 설정 파일 로드"""
@@ -183,81 +191,18 @@ class DatasetLoader:
             print("❌ 지원하지 않는 데이터셋 타입: {}".format(dataset_info['type']))
             return None
         
-        # 파일 경로 절대 경로로 변환 (더 견고한 방식)
-        # 1. config 파일 기준으로 경로 해석
-        config_dir = os.path.dirname(os.path.abspath(self.config_path))
-        # 2. 현재 작업 디렉토리도 고려 (train.py가 실행되는 위치)
-        current_dir = os.getcwd()
-        
+        # 파일 경로 절대 경로로 변환 (단순화된 3단계 방식)
         file_paths = []
         
         for path in dataset_info['paths']:
-            if os.path.isabs(path):
-                # 절대 경로인 경우 그대로 사용
-                abs_path = path
-            else:
-                # 상대 경로인 경우 여러 방법으로 시도
-                abs_path = None
-                
-                # 방법 1: config 파일 기준으로 해석
-                try_path1 = os.path.join(config_dir, path)
-                
-                # 방법 2: 현재 작업 디렉토리 기준으로 해석
-                try_path2 = os.path.join(current_dir, path)
-                
-                # 방법 3: 프로젝트 루트에서 train_data 찾기
-                # config_dir의 부모 디렉토리에서 train_data 폴더 찾기
-                project_root = os.path.dirname(config_dir)
-                filename = os.path.basename(path)
-                try_path3 = os.path.join(project_root, 'train_data', filename)
-                
-                # 방법 4-6: 파일명만 있는 경우, train_data 폴더를 여러 위치에서 찾기
-                if '/' not in path and '\\' not in path:  # 파일명만 있는 경우
-                    # 현재 디렉토리에서 train_data 찾기
-                    try_path4 = os.path.join(current_dir, 'train_data', path)
-                    # 상위 디렉토리에서 train_data 찾기 
-                    try_path5 = os.path.join(os.path.dirname(current_dir), 'train_data', path)
-                    # 상위 디렉토리의 상위에서 train_data 찾기 (git 루트 등)
-                    try_path6 = os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'train_data', path)
-                    
-                    # 방법 7: config 파일 경로에서 git 루트 찾기
-                    git_root = self._find_git_or_project_root(config_dir)
-                    try_path7 = os.path.join(git_root, 'train_data', path) if git_root else None
-                else:
-                    try_path4 = try_path5 = try_path6 = try_path7 = None
-                
-                # 존재하는 경로 찾기
-                candidates = [try_path1, try_path2, try_path3]
-                if try_path4:
-                    candidates.append(try_path4)
-                if try_path5:
-                    candidates.append(try_path5)
-                if try_path6:
-                    candidates.append(try_path6)
-                if try_path7:
-                    candidates.append(try_path7)
-                    
-                for candidate in candidates:
-                    if candidate and os.path.exists(candidate):
-                        abs_path = candidate
-                        break
-                
-                # 디버깅을 위한 정보 출력 (파일을 찾지 못한 경우만)
-                if abs_path is None:
-                    print("🔍 파일 '{}' 경로 탐색 결과:".format(os.path.basename(path)))
-                    for i, candidate in enumerate(candidates, 1):
-                        if candidate:
-                            exists = "✅" if os.path.exists(candidate) else "❌"
-                            print("   {}. {} {}".format(i, exists, candidate))
-                    abs_path = try_path1  # 기본값으로 첫 번째 시도 사용
-                else:
-                    # 성공적으로 찾았을 때는 간단한 로그만 (첫 번째 파일에 대해서만)
-                    if path == dataset_info['paths'][0]:
-                        print("📁 데이터 파일 위치: {}".format(os.path.dirname(abs_path)))
-            
+            abs_path = self._resolve_file_path(path)
             file_paths.append(abs_path)
         
         print("📂 데이터셋 로딩: {} ({}개 파일)".format(dataset_info['name'], len(file_paths)))
+        
+        # 첫 번째 파일의 위치만 표시
+        if file_paths and os.path.exists(file_paths[0]):
+            print("📁 데이터 파일 위치: {}".format(os.path.dirname(file_paths[0])))
         
         # 데이터셋 생성
         dataset = GameOfLifeDataset(file_paths)
