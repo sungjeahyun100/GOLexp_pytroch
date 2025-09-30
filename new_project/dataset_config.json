@@ -160,6 +160,8 @@
       "type": "simulation_files", 
       "paths": [
         "database-54321_1000_0.700000.txt",
+        "database-54321_1000_0.710000.txt",
+        "database-54321_1000_0.720000.txt",
         "database-54321_1000_0.800000.txt",
         "database-54321_1000_0.900000.txt"
       ],

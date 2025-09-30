@@ -213,12 +213,24 @@ def main():
         args.dataset = experiment_config['dataset']
         args.model_config = experiment_config['model']
         
-        # 훈련 파라미터 적용 (명령행 인자가 기본값인 경우만)
-        if args.epochs == 50:  # 기본값
+        # 훈련 파라미터 적용 (명령행에서 명시적으로 제공되지 않은 경우만)
+        import sys
+        
+        # 명령행 인자에서 명시적으로 제공되었는지 확인
+        epochs_provided = '--epochs' in sys.argv
+        lr_provided = '--lr' in sys.argv
+        batch_size_provided = '--batch-size' in sys.argv or '--batch_size' in sys.argv
+        
+        if not epochs_provided:
             args.epochs = experiment_config['training_params']['epochs']
-        if args.lr == 0.001:  # 기본값
+            print(f"📊 실험 설정 epochs 적용: {args.epochs}")
+        else:
+            print(f"📊 명령행 epochs 사용: {args.epochs}")
+            
+        if not lr_provided:
             args.lr = experiment_config['training_params']['learning_rate']
-        if args.batch_size == 32:  # 기본값
+            
+        if not batch_size_provided:
             args.batch_size = experiment_config['training_params']['batch_size']
         
         if not args.quiet:
@@ -281,12 +293,23 @@ def main():
             print_available_models()
             return 1
             
-        # 추천 하이퍼파라미터 적용 (명령행 인자가 기본값인 경우)
-        if args.epochs == 50:  # 기본값
+        # 추천 하이퍼파라미터 적용 (명령행에서 명시적으로 제공되지 않은 경우만)
+        import sys
+        
+        epochs_provided = '--epochs' in sys.argv
+        lr_provided = '--lr' in sys.argv
+        batch_size_provided = '--batch-size' in sys.argv or '--batch_size' in sys.argv
+        
+        if not epochs_provided:
             args.epochs = model_config['recommended_epochs']
-        if args.lr == 0.001:  # 기본값
+            print(f"📊 모델 추천 epochs 적용: {args.epochs}")
+        else:
+            print(f"📊 명령행 epochs 사용: {args.epochs}")
+            
+        if not lr_provided:
             args.lr = model_config['recommended_lr']
-        if args.batch_size == 32:  # 기본값
+            
+        if not batch_size_provided:
             args.batch_size = model_config['recommended_batch_size']
             # 이미 생성된 dataloader가 있다면 재생성 필요
             if args.dataset:
