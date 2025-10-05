@@ -123,7 +123,7 @@ int GOL_2_H::simulateAndLabel(const std::vector<int>& init_pattern)
         prev = alive;
         
         // 다음 세대 계산 (in-place 방식으로 메모리 효율적)
-        nextGen(current, next, BOARDWIDTH, BOARDHEIGHT);
+        nextGen(current, next, WIDTH, HEIGHT);
         
         // 벡터 교체 (복사 없이 포인터만 교체)
         current.swap(next);

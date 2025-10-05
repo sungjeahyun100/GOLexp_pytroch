@@ -100,9 +100,15 @@ docker-compose up -d golexp-cpu
 docker exec -it golexp-cpu python3 new_project/interface.py
 ```
 
-**🖥️ GUI 없는 환경 (헤드리스 모드)**:
+**🖥️ GUI 없는 환경 (윈도우 사용자 권장)**:
 ```bash
-# 모델 테스트만 (pygame GUI 없음)
+# CLI 인터페이스 (GUI 없음, 텍스트 기반)
+docker exec -it golexp-gpu python3 new_project/interface_cli.py
+
+# 자동 테스트 모드
+docker exec -it golexp-gpu python3 new_project/interface_cli.py --headless
+
+# 기존 pygame GUI (헤드리스 모드)
 docker exec -it golexp-gpu python3 new_project/interface.py --headless
 ```
 
@@ -178,6 +184,77 @@ python3 train.py --dataset small_simulation --epochs 50
 
 ## 🎮 사용법
 
+### 🖥️ CLI 인터페이스 (윈도우 사용자 권장)
+
+**X11이 없는 윈도우 환경을 위한 텍스트 기반 인터페이스**
+- ✅ **PyGame 불필요**: GUI 라이브러리 없이도 실행
+- ✅ **원격 SSH**: 서버 환경에서도 완벽 동작  
+- ✅ **Windows 친화적**: X11 포워딩 설정 불필요
+- ✅ **Docker 호환**: 모든 Docker 환경에서 즉시 실행
+
+```bash
+cd new_project
+python3 interface_cli.py
+```
+
+**주요 명령어:**
+- `edit` - 그리드 편집 모드
+- `predict` - AI 모델 예측 실행
+- `save` - 현재 패턴 저장
+- `load` - 저장된 패턴 불러오기
+- `model` - 모델 변경
+- `random` - 랜덤 패턴 생성
+- `help` - 전체 도움말
+
+**사용 예제:**
+```bash
+# 1. CLI 시작
+python3 interface_cli.py
+
+# 2. 그리드 편집
+> edit
+좌표 입력 (예: 3,4): 2,3
+좌표 입력 (예: 3,4): 4,5
+좌표 입력 (예: 3,4): done
+
+# 3. 예측 실행
+> predict
+
+# 4. 패턴 저장
+> save
+패턴 이름: my_pattern
+
+# 5. 모델 변경
+> model
+모델 선택 (1-2): 2
+
+# 6. 유명한 패턴 로드하기
+> load
+선택 (1 또는 2): 2        # 라이브러리 패턴
+카테고리 선택: 1          # still_life
+패턴 선택: 1              # block
+
+# 7. 다른 패턴 시도
+> load  
+선택 (1 또는 2): 2        # 라이브러리 패턴  
+카테고리 선택: 2          # oscillators
+패턴 선택: 1              # blinker
+```
+
+**CLI 인터페이스 장점:**
+- ✅ **윈도우 호환**: X11 포워딩 불필요
+- ✅ **경량**: pygame 의존성 없음
+- ✅ **SSH 친화적**: 원격 서버에서도 실행 가능
+- ✅ **스크립팅 가능**: 자동화 및 배치 처리 지원
+- ✅ **패턴 라이브러리**: 유명한 GoL 패턴들 내장
+
+**내장된 패턴 라이브러리:**
+- 🏠 **정물(Still Life)**: Block, Beehive, Boat, Tub, Loaf
+- 🔄 **진동자(Oscillator)**: Blinker, Toad, Beacon, Pulsar
+- 🚀 **우주선(Spaceship)**: Glider, LWSS
+- ⏳ **메두셀라(Methuselah)**: R-Pentomino, Diehard, Acorn
+- 🧪 **테스트**: Empty, Cross, Dense Square 등
+
 ### 모델 훈련
 
 **JSON 구성 파일 사용** (권장):
@@ -200,8 +277,22 @@ python3 train.py --files ../train_data/database-54321_1000_0.300000.txt --epochs
 - `--batch_size`: 배치 크기 (기본값: 512)
 
 ### 시각화 및 테스트
+
+**GUI 인터페이스** (pygame 필요):
 ```bash
 python3 interface.py
+```
+
+**CLI 인터페이스** (윈도우 사용자 권장, GUI 없음):
+```bash
+# 기본 실행
+python3 interface_cli.py
+
+# 특정 모델 지정
+python3 interface_cli.py --model saved_models/my_model.pth
+
+# 자동 테스트 모드
+python3 interface_cli.py --headless
 ```
 ### 데이터셋 구성
 

@@ -30,7 +30,7 @@ extern "C"{
     
     // 패턴 예측 함수 (GPU 버전)
     int getPredict(int* initialPattern){
-        d_matrix_ver2::d_matrix_2<int> initP;
+        d_matrix_ver2::d_matrix_2<int> initP(10, 10);  // 명시적으로 10x10 크기 설정
         std::vector<int> initP_host(initialPattern, initialPattern+100);
         initP.setHostData(initP_host);
         initP.cpyToDev();
@@ -39,7 +39,7 @@ extern "C"{
     
     // 최적화된 패턴 예측 함수 (GPU 버전) - 배치 처리로 성능 향상
     int getPredictOptimized(int* initialPattern){
-        d_matrix_ver2::d_matrix_2<int> initP;
+        d_matrix_ver2::d_matrix_2<int> initP(10, 10);  // 명시적으로 10x10 크기 설정
         std::vector<int> initP_host(initialPattern, initialPattern+100);
         initP.setHostData(initP_host);
         initP.cpyToDev();
