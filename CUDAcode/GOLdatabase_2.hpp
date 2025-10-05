@@ -43,6 +43,9 @@ namespace GOL_2 {
     extern const pattern glider_right_up; // 우-상향 방향으로 이동하는 글라이더
     extern const pattern glider_right_down; // 우-하향 방향으로 이동하는 글라이더
 
+    // 최적화된 시뮬레이션: 배치 처리로 CPU-GPU 동기화 최소화
+    int simulatePatternInKernal(const d_matrix_2<int>& initialPattern, int fileId, cudaStream_t str = 0);
+
     // Game of Life 다음 세대 계산 커널
     __global__ void nextGenKernel(int* current, int* next, int width, int height);
 
@@ -57,6 +60,13 @@ namespace GOL_2 {
         int fullHeight, int fullWidth, 
         int patternHeight, int patternWidth, 
         double aliveRatio, cudaStream_t str = 0
+    );
+
+    // 시드를 사용한 고정 비율 패턴 생성 (실제 데이터 생성과 동일)
+    d_matrix_2<int> generateFixedRatioPatternWithSeed(
+        int fullHeight, int fullWidth, 
+        int patternHeight, int patternWidth, 
+        double aliveRatio, int seed, cudaStream_t str = 0
     );
 
     // Game of Life 데이터 생성 (동일 시드 -> 동일 데이터셋)

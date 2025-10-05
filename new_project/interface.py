@@ -25,10 +25,27 @@ lib = ct.CDLL(kernel_path)
 lib.getPredict.argtypes = [ct.POINTER(ct.c_int)]
 lib.getPredict.restype = ct.c_int
 
+# 최적화된 함수 추가 (있다면)
+try:
+    lib.getPredictOptimized.argtypes = [ct.POINTER(ct.c_int)]
+    lib.getPredictOptimized.restype = ct.c_int
+    optimized_available = True
+    print("🚀 최적화된 예측 함수 사용 가능")
+except AttributeError:
+    optimized_available = False
+    print("⚠️ 최적화된 예측 함수를 찾을 수 없습니다")
+
 def predict_actual(grid):
     flat = grid.flatten().astype(np.int32)
     ptr = flat.ctypes.data_as(ct.POINTER(ct.c_int))
     return lib.getPredict(ptr)
+
+def predict_actual_optimized(grid):
+    if not optimized_available:
+        return predict_actual(grid)
+    flat = grid.flatten().astype(np.int32)
+    ptr = flat.ctypes.data_as(ct.POINTER(ct.c_int))
+    return lib.getPredictOptimized(ptr)
 
 def find_available_models(models_dir="saved_models"):
     """saved_models 폴더에서 사용 가능한 모델 파일들을 찾아서 반환"""

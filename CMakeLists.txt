@@ -32,7 +32,7 @@ if(CUDAToolkit_FOUND)
         set(CMAKE_CUDA_STANDARD 17)
         set(CMAKE_CUDA_STANDARD_REQUIRED ON)
         set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-        set(CMAKE_CUDA_ARCHITECTURES 75 80 86)
+        set(CMAKE_CUDA_ARCHITECTURES 70 75 80 86)
         
         # CUDA 컴파일러 플래그
         set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --allow-unsupported-compiler")

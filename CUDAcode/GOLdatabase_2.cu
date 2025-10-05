@@ -680,4 +680,169 @@ namespace GOL_2 {
         cudaStreamDestroy(stream);
     }
 
+    // GPU에서 여러 세대를 연속 계산하고 alive 카운트를 배치로 반환하는 커널
+    __global__ void simulateBatchGenerationsKernel(int* current, int* next, int* alive_counts, 
+                                                   int width, int height, int batch_size) {
+        int i = blockIdx.y * blockDim.y + threadIdx.y;
+        int j = blockIdx.x * blockDim.x + threadIdx.x;
+        
+        // 공유 메모리로 alive 카운트 (블록별)
+        __shared__ int shared_count[32*32];
+        int tid = threadIdx.y * blockDim.x + threadIdx.x;
+        
+        for (int gen = 0; gen < batch_size; gen++) {
+            // 동기화
+            __syncthreads();
+            
+            // Game of Life 다음 세대 계산
+            if (i < height && j < width) {
+                int alive = 0;
+                for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if(dx == 0 && dy == 0) continue;
+                        int ni = i + dx;
+                        int nj = j + dy;
+                        if (ni >= 0 && ni < height && nj >= 0 && nj < width) {
+                            alive += current[ni * width + nj];
+                        }
+                    }
+                }
+
+                int idx = i * width + j;
+                if (current[idx] == 1) {
+                    next[idx] = (alive == 2 || alive == 3) ? 1 : 0;
+                } else {
+                    next[idx] = (alive == 3) ? 1 : 0;
+                }
+            }
+            
+            __syncthreads();
+            
+            // 포인터 스왑 (모든 스레드가 동일하게)
+            int* temp = current;
+            current = next;
+            next = temp;
+            
+            // alive 개수 카운트 (블록 단위 reduction)
+            int local_alive = 0;
+            if (i < height && j < width) {
+                local_alive = current[i * width + j];
+            }
+            
+            shared_count[tid] = local_alive;
+            __syncthreads();
+            
+            // Reduction
+            for (int stride = (blockDim.x * blockDim.y) / 2; stride > 0; stride /= 2) {
+                if (tid < stride && (tid + stride) < (blockDim.x * blockDim.y)) {
+                    shared_count[tid] += shared_count[tid + stride];
+                }
+                __syncthreads();
+            }
+            
+            // 블록당 하나의 스레드가 글로벌 메모리에 결과 저장
+            if (tid == 0) {
+                atomicAdd(&alive_counts[gen], shared_count[0]);
+            }
+        }
+    }
+
+    // 최적화된 시뮬레이션: 진짜 GPU 배치 처리로 CPU-GPU 동기화 최소화
+    int simulatePatternInKernal(const d_matrix_2<int>& initialPattern, int fileId, cudaStream_t str) {
+        const int H = initialPattern.getRow();
+        const int W = initialPattern.getCol();
+        const int BATCH_SIZE = 100; // 100세대씩 배치 처리
+        
+        // 디바이스 메모리 할당
+        int* d_curr = initialPattern.getDevPointer();
+        int* d_next = nullptr;
+        int* d_alive_counts = nullptr;
+        
+        cudaError_t err = cudaMalloc(&d_next, sizeof(int) * H * W);
+        if (err != cudaSuccess) {
+            std::cerr << "CUDA malloc failed for d_next: " << cudaGetErrorString(err) << std::endl;
+            return -1;
+        }
+        
+        err = cudaMalloc(&d_alive_counts, sizeof(int) * BATCH_SIZE);
+        if (err != cudaSuccess) {
+            std::cerr << "CUDA malloc failed for d_alive_counts: " << cudaGetErrorString(err) << std::endl;
+            cudaFree(d_next);
+            return -1;
+        }
+        
+        // 히스토리 배열 (CPU)
+        std::vector<int> h_alive_counts(BATCH_SIZE);
+        
+        int gen = 0;
+        int constantCount = 0;
+        int prev = -1;
+        bool strictlyIncreasing = true;
+        
+        dim3 blockSize(32, 32);
+        dim3 gridSize((W + 31) / 32, (H + 31) / 32);
+        
+        while (gen < MAXGEN) {
+            int current_batch_size = std::min(BATCH_SIZE, MAXGEN - gen);
+            
+            // GPU 메모리 초기화
+            cudaMemsetAsync(d_alive_counts, 0, sizeof(int) * current_batch_size, str);
+            
+            // GPU에서 배치 단위로 여러 세대 계산 (진짜 배치 처리!)
+            simulateBatchGenerationsKernel<<<gridSize, blockSize, 0, str>>>(
+                d_curr, d_next, d_alive_counts, W, H, current_batch_size);
+            
+            // 배치 완료 후 한 번만 CPU로 복사
+            cudaMemcpyAsync(h_alive_counts.data(), d_alive_counts, 
+                           sizeof(int) * current_batch_size, cudaMemcpyDeviceToHost, str);
+            cudaStreamSynchronize(str);
+            
+            // 히스토리 분석 및 조기 종료 조건 검사
+            bool should_terminate = false;
+            
+            for (int i = 0; i < current_batch_size; i++) {
+                int alive = h_alive_counts[i];
+                
+                // 발산 감지: 100세대 연속으로 증가
+                if (prev != -1 && alive <= prev) {
+                    strictlyIncreasing = false;
+                }
+                
+                // 안정화/소멸 감지: 100세대 연속으로 동일
+                if (prev == alive) {
+                    constantCount++;
+                } else {
+                    constantCount = 0;
+                }
+                
+                // 조기 종료 조건 체크
+                if (constantCount >= 100 || (strictlyIncreasing && gen + i >= 100)) {
+                    should_terminate = true;
+                    gen += i + 1;
+                    break;
+                }
+                
+                prev = alive;
+            }
+            
+            if (should_terminate) {
+                break;
+            }
+            
+            gen += current_batch_size;
+        }
+        
+        // 최종 살아있는 셀 개수 반환 (마지막 상태에서)
+        int final_alive = 0;
+        thrust::device_ptr<const int> ptr(d_curr);
+        final_alive = thrust::reduce(thrust::cuda::par.on(str), ptr, ptr + H * W, 0, thrust::plus<int>());
+        cudaStreamSynchronize(str);
+        
+        // 메모리 해제
+        cudaFree(d_next);
+        cudaFree(d_alive_counts);
+        
+        return final_alive;
+    }
+
 } // namespace GOL_2

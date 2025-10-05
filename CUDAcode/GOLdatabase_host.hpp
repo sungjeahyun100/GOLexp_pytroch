@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <thread>
+#include <deque>
+#include <numeric>
 #include "utility.hpp"
 
 namespace GOL_2_H{
@@ -22,6 +24,7 @@ namespace GOL_2_H{
     void nextGen(const std::vector<int>& src, std::vector<int>& dst, int width, int height);
     void padding(const std::vector<int>& pattern, std::vector<int>& board, int full_w, int full_h, int pattern_w, int pattern_h);
     int simulateAndLabel(const std::vector<int>& init_pattern);
+    
     void generateGameOfLifeDataInHost(dataset_id data_config);
 }
 
