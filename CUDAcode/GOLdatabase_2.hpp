@@ -93,4 +93,8 @@ namespace GOL_2 {
 
     // 살아있는 셀 카운트 커널
     __global__ void countAliveKernel(int* mat, int* partialSums, int totalSize);
+
+    // ⚡ CPU-GPU 오버헤드 최적화된 데이터 생성 함수들 (simulatePatternInKernal 사용)
+    void generateGameOfLifeDataOptimize(int filenum, double ratio, int seed, dataset_id info);
+    void generateGameOfLifeDataOptimizeInOneFile(int filenum, double ratio, int seed, dataset_id info);
 }
