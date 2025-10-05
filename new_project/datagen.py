@@ -67,6 +67,14 @@ def setup_gpu_library_functions(library):
         # GPU 단일파일 데이터 생성
         library.genGOLdataInOneFile.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
         library.genGOLdataInOneFile.restype = None
+
+        # gpu-cpu 오버해드 해결한 함수-다중 파일 버전.
+        library.genGOLdataOptimize.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdataOptimize.restype = None
+
+        # gpu-cpu 오버해드 해결한 함수-단일 파일 버전.
+        library.genGOLdataOptimizeInOneFile.argtypes = [ct.c_uint32, ct.c_uint32, ct.c_double]
+        library.genGOLdataOptimizeInOneFile.restype = None
         
         # GPU 패턴 예측 함수
         library.getPredict.argtypes = [ct.POINTER(ct.c_int)]
@@ -84,6 +92,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', help='상세 출력')
     parser.add_argument('--output', '-o', type=str, help='출력 디렉토리')
     parser.add_argument('--one_file', action='store_true', help='한 파일에 데이터를 몰아서 저장')
+    parser.add_argument('--gpu_optimize', action='store_true', help='gpu-cpu간 오버헤드 감소시킨 알고리즘 적용')
     parser.add_argument('--cpu', action='store_true', help="외장 글카 없는 경우에 cpu로 데이터 생성이 가능케 함")
     
     args = parser.parse_args()
@@ -140,9 +149,15 @@ def main():
         # GPU 모드: genGOLdata 또는 genGOLdataInOneFile 사용
         try:
             if args.one_file:
-               lib.genGOLdataInOneFile(args.param1, args.param2, args.param3)
+                if args.gpu_optimize:
+                    lib.genGOLdataOptimizeInOneFile(args.param1, args.param2, args.param3)
+                else:
+                    lib.genGOLdataInOneFile(args.param1, args.param2, args.param3)
             else:
-               lib.genGOLdata(args.param1, args.param2, args.param3)
+                if args.gpu_optimize:
+                   lib.genGOLdataOptimize(args.param1, args.param2, args.param3)
+                else:
+                   lib.genGOLdata(args.param1, args.param2, args.param3)
         except Exception as e:
             print("❌ GPU 모드 오류: " + str(e))
             return 1
