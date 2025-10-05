@@ -1,0 +1,267 @@
+{
+  "_comment": "Game of Life 유명한 패턴 라이브러리",
+  "_version": "1.0",
+  "_description": "정물(Still Life), 진동자(Oscillator), 기타 유명한 GoL 패턴들",
+  
+  "still_life": {
+    "_description": "안정한 정물 패턴들 - 변하지 않는 구조",
+    
+    "block": {
+      "name": "블록 (Block)",
+      "description": "가장 단순한 2x2 정물 패턴",
+      "size": [2, 2],
+      "pattern": [
+        [1, 1],
+        [1, 1]
+      ],
+      "period": 1,
+      "type": "still_life"
+    },
+    
+    "beehive": {
+      "name": "벌집 (Beehive)", 
+      "description": "6개 셀로 이루어진 육각형 모양 정물",
+      "size": [4, 3],
+      "pattern": [
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [0, 1, 1, 0]
+      ],
+      "period": 1,
+      "type": "still_life"
+    },
+    
+    "loaf": {
+      "name": "빵덩어리 (Loaf)",
+      "description": "7개 셀로 이루어진 비대칭 정물",
+      "size": [4, 4],
+      "pattern": [
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [0, 1, 0, 1],
+        [0, 0, 1, 0]
+      ],
+      "period": 1,
+      "type": "still_life"
+    },
+    
+    "boat": {
+      "name": "보트 (Boat)",
+      "description": "5개 셀로 이루어진 작은 보트 모양",
+      "size": [3, 3],
+      "pattern": [
+        [1, 1, 0],
+        [1, 0, 1],
+        [0, 1, 0]
+      ],
+      "period": 1,
+      "type": "still_life"
+    },
+    
+    "tub": {
+      "name": "욕조 (Tub)",
+      "description": "4개 셀로 이루어진 원형 정물",
+      "size": [3, 3],
+      "pattern": [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 1, 0]
+      ],
+      "period": 1,
+      "type": "still_life"
+    }
+  },
+  
+  "oscillators": {
+    "_description": "진동자 패턴들 - 주기적으로 변하는 구조",
+    
+    "blinker": {
+      "name": "깜박이 (Blinker)",
+      "description": "가장 단순한 주기-2 진동자",
+      "size": [3, 1],
+      "pattern": [
+        [1],
+        [1], 
+        [1]
+      ],
+      "period": 2,
+      "type": "oscillator"
+    },
+    
+    "toad": {
+      "name": "두꺼비 (Toad)",
+      "description": "주기-2 진동자, 6개 셀",
+      "size": [4, 2],
+      "pattern": [
+        [0, 1, 1, 1],
+        [1, 1, 1, 0]
+      ],
+      "period": 2,
+      "type": "oscillator"
+    },
+    
+    "beacon": {
+      "name": "봉화 (Beacon)",
+      "description": "주기-2 진동자, 두 개의 블록이 교대로 켜짐",
+      "size": [4, 4],
+      "pattern": [
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [0, 0, 1, 1]
+      ],
+      "period": 2,
+      "type": "oscillator"
+    },
+    
+    "pulsar": {
+      "name": "펄사 (Pulsar)",
+      "description": "주기-3 진동자, 대칭적인 큰 구조",
+      "size": [13, 13],
+      "pattern": [
+        [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0]
+      ],
+      "period": 3,
+      "type": "oscillator"
+    }
+  },
+  
+  "spaceships": {
+    "_description": "우주선 패턴들 - 이동하는 구조",
+    
+    "glider": {
+      "name": "글라이더 (Glider)",
+      "description": "가장 유명한 우주선, 대각선으로 이동",
+      "size": [3, 3],
+      "pattern": [
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      "period": 4,
+      "type": "spaceship",
+      "velocity": [1, 1]
+    },
+    
+    "lwss": {
+      "name": "경량 우주선 (LWSS)",
+      "description": "Light-weight Spaceship, 수평 이동",
+      "size": [5, 4],
+      "pattern": [
+        [1, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [0, 1, 1, 1, 1]
+      ],
+      "period": 4,
+      "type": "spaceship",
+      "velocity": [2, 0]
+    }
+  },
+  
+  "test_patterns": {
+    "_description": "테스트용 특수 패턴들",
+    
+    "empty": {
+      "name": "빈 그리드",
+      "description": "모든 셀이 죽은 상태",
+      "size": [1, 1],
+      "pattern": [[0]],
+      "period": 1,
+      "type": "test"
+    },
+    
+    "single_cell": {
+      "name": "단일 셀",
+      "description": "하나의 살아있는 셀 (곧 죽음)",
+      "size": [1, 1], 
+      "pattern": [[1]],
+      "period": 0,
+      "type": "test"
+    },
+    
+    "cross": {
+      "name": "십자가",
+      "description": "십자 모양 패턴 (불안정)",
+      "size": [3, 3],
+      "pattern": [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 1, 0]
+      ],
+      "period": 0,
+      "type": "test"
+    },
+    
+    "dense_square": {
+      "name": "밀집 사각형",
+      "description": "3x3 모든 셀이 살아있음 (불안정)",
+      "size": [3, 3],
+      "pattern": [
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]
+      ],
+      "period": 0,
+      "type": "test"
+    }
+  },
+  
+  "methuselahs": {
+    "_description": "메두셀라 패턴들 - 작지만 오래 진화하는 패턴",
+    
+    "r_pentomino": {
+      "name": "R-펜토미노",
+      "description": "5개 셀에서 시작해 1100+ 세대 진화",
+      "size": [3, 2],
+      "pattern": [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 1, 0]
+      ],
+      "period": 0,
+      "type": "methuselah",
+      "stabilizes_at": 1103
+    },
+    
+    "diehard": {
+      "name": "다이하드",
+      "description": "7개 셀에서 시작해 130세대 후 완전히 사라짐",
+      "size": [8, 3],
+      "pattern": [
+        [0, 0, 0, 0, 0, 0, 1, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 1, 1, 1]
+      ],
+      "period": 0,
+      "type": "methuselah",
+      "dies_at": 130
+    },
+    
+    "acorn": {
+      "name": "도토리 (Acorn)",
+      "description": "7개 셀에서 시작해 5206세대까지 진화",
+      "size": [7, 3],
+      "pattern": [
+        [0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+        [1, 1, 0, 0, 1, 1, 1]
+      ],
+      "period": 0,
+      "type": "methuselah",
+      "stabilizes_at": 5206
+    }
+  }
+}
