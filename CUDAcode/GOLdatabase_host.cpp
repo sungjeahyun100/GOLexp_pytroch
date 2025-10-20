@@ -123,7 +123,7 @@ int GOL_2_H::simulateAndLabel(const std::vector<int>& init_pattern)
         prev = alive;
         
         // 다음 세대 계산 (in-place 방식으로 메모리 효율적)
-        nextGen(current, next, WIDTH, HEIGHT);
+        nextGen(current, next, BOARDWIDTH, BOARDHEIGHT);
         
         // 벡터 교체 (복사 없이 포인터만 교체)
         current.swap(next);
@@ -140,11 +140,11 @@ int GOL_2_H::simulateAndLabel(const std::vector<int>& init_pattern)
     return finalAlive;
 }
 
-void GOL_2_H::generateGameOfLifeDataInHost(dataset_id data_config)
+void GOL_2_H::generateGameOfLifeDataInHost(dataset_id data_config, std::string root)
 {
     // 프로젝트 루트 찾기 및 train_data 디렉토리 생성
     std::string projectRoot = findProjectRoot();
-    std::string trainDataPath = projectRoot + "/train_data";
+    std::string trainDataPath = projectRoot + root;
     std::filesystem::create_directories(trainDataPath);
     
     std::string datasetName = trainDataPath + "/" + getDatasetId(data_config);

@@ -180,3 +180,5 @@ def predict_to_number(model, input_data):
                 number += 2 ** (9 - i)
         
         return int(number)
+
+

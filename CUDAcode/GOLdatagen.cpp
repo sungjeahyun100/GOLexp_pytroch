@@ -11,20 +11,8 @@
 
 extern "C" {
 
-// CPU 전용 데이터 생성 (호스트 메모리 최적화)
-void genGOLdataInHost(uint32_t seed, uint32_t sample_quantity, double alive_ratio) {
-    std::cout << "🔧 CPU 모드로 데이터 생성 중..." << std::endl;
-    
-    dataset_id config;
-    config.seed = seed;
-    config.sample_quantity = sample_quantity;
-    config.alive_ratio = static_cast<float>(alive_ratio);
-    
-    GOL_2_H::generateGameOfLifeDataInHost(config);
-}
-
 // CPU 전용 단일 파일 데이터 생성 (CPU 호스트 함수 활용)
-void genGOLdataInOneFile(uint32_t seed, uint32_t sample_quantity, double alive_ratio) {
+void genGOLdataInOneFile(uint32_t seed, uint32_t sample_quantity, double alive_ratio, const char* root) {
     std::cout << "🔧 CPU 모드로 데이터 생성 중..." << std::endl;
     
     dataset_id config;
@@ -32,7 +20,7 @@ void genGOLdataInOneFile(uint32_t seed, uint32_t sample_quantity, double alive_r
     config.sample_quantity = sample_quantity;
     config.alive_ratio = static_cast<float>(alive_ratio);
     
-    GOL_2_H::generateGameOfLifeDataInHost(config);
+    GOL_2_H::generateGameOfLifeDataInHost(config, static_cast<std::string>(root));
     std::cout << "✅ CPU 데이터 생성 완료!" << std::endl;
 }
 

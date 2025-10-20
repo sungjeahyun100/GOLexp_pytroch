@@ -25,7 +25,7 @@ namespace GOL_2_H{
     void padding(const std::vector<int>& pattern, std::vector<int>& board, int full_w, int full_h, int pattern_w, int pattern_h);
     int simulateAndLabel(const std::vector<int>& init_pattern);
     
-    void generateGameOfLifeDataInHost(dataset_id data_config);
+    void generateGameOfLifeDataInHost(dataset_id data_config, std::string root);
 }
 
 

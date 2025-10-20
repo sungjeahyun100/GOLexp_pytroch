@@ -680,6 +680,92 @@ namespace GOL_2 {
         cudaStreamDestroy(stream);
     }
 
+    void generateGameOfLifeDataInOneFile_RootFlexible(int filenum, double ratio, int seed, dataset_id info, std::string generate_root) {
+        int deviceCount = 0;
+        cudaError_t err = cudaGetDeviceCount(&deviceCount);
+        if (err != cudaSuccess || deviceCount == 0) {
+            std::cerr << "[FATAL] No CUDA device: " << cudaGetErrorString(err) << std::endl;
+            exit(1);
+        }
+        cudaSetDevice(0);
+
+        // 스트림 생성
+        cudaStream_t stream;
+        cudaStreamCreate(&stream);
+
+        std::string projectRoot = findProjectRoot();
+        std::string trainDataPath = projectRoot + generate_root;
+        std::string datasetName = getDatasetId(info);
+
+        if (fs::exists(trainDataPath)) {
+            std::cout << "[INFO] Dataset directory already exists: " << trainDataPath << std::endl;
+        } else {
+            fs::create_directories(trainDataPath);
+        }
+
+        int totalFiles = filenum;
+        double aliveratio = ratio;
+
+        std::cout << "totalData:" << totalFiles << " (file name: " << trainDataPath + "/" + datasetName << ")" << std::endl;
+        std::cout << "aliveratio:" << aliveratio << std::endl;
+        std::cout << "max generation:" << MAXGEN << std::endl;
+        std::cout << "pattern size:" << HEIGHT << " * " << WIDTH << std::endl;
+        std::cout << "board size:" << BOARDHEIGHT << " * " << BOARDWIDTH << std::endl;
+
+        auto startTime = std::chrono::steady_clock::now();
+
+        // 고정 시드 기반 난수 엔진 (파일 ID 오프셋으로 각 샘플을 유일화하되 결정성 유지)
+        std::mt19937_64 global_gen(static_cast<uint64_t>(seed));
+        std::uniform_int_distribution<int> offset_dist(0, std::numeric_limits<int>::max());
+
+        std::ofstream fout(trainDataPath + "/" + datasetName + ".txt");
+
+        for (int fileId = 1; fileId <= totalFiles; ++fileId) {
+            // 각 샘플에 대해 고유하지만 결정적인 시드를 생성
+            // 시드 충돌 줄이기 위해 64비트 혼합
+            uint64_t file_seed = static_cast<uint64_t>(seed) ^ (static_cast<uint64_t>(fileId) * 0x9E3779B97F4A7C15ULL);
+            // 패턴 생성에 시드 적용
+            d_matrix_2<int> pattern = generateFixedRatioPatternWithSeed(BOARDHEIGHT, BOARDWIDTH, HEIGHT, WIDTH, aliveratio, static_cast<int>(file_seed & 0x7fffffff), stream);
+
+            pattern.cpyToHost(stream);
+            
+            // 단일 시뮬레이션으로 최종 패턴과 라벨을 동시에 얻음
+            int label = simulateAndLabel(pattern, fileId, stream);
+
+            int startRow = (BOARDHEIGHT - HEIGHT) / 2;
+            int startCol = (BOARDWIDTH - WIDTH) / 2;
+            
+            // GPU 작업이 완료될 때까지 대기
+            cudaStreamSynchronize(stream);
+
+            fout << "[" << fileId << "]" << '\n';
+            // 초기 패턴 저장
+            for (int i = startRow; i < startRow + HEIGHT; ++i) {
+                for (int j = startCol; j < startCol + WIDTH; ++j) {
+                    fout << pattern(i, j);
+                }
+                fout << '\n';
+            }
+
+            fout << label << '\n';
+            
+            // 진행률 표시 최적화: 매 100번째마다만 업데이트
+            if (fileId % 100 == 0 || fileId == totalFiles) {
+                std::string prograss_name = "GOL data generating... " + std::to_string(fileId) + "/" + std::to_string(totalFiles);
+                printProgressBar(fileId, totalFiles, startTime, prograss_name);
+            }
+        }
+        fout.close();
+        
+        std::cout << std::endl << "[Done] Dataset generation complete." << std::endl;
+
+        auto totalElapsed = std::chrono::steady_clock::now() - startTime;
+        int totalSec = std::chrono::duration_cast<std::chrono::seconds>(totalElapsed).count();
+        std::cout << "총 실행 시간: " << totalSec << " 초" << std::endl;
+
+        cudaStreamDestroy(stream);
+    }
+
     // GPU에서 여러 세대를 연속 계산하고 alive 카운트를 배치로 반환하는 커널
     __global__ void simulateBatchGenerationsKernel(int* current, int* next, int* alive_counts, 
                                                    int width, int height, int batch_size) {
@@ -950,6 +1036,92 @@ namespace GOL_2 {
 
         std::string projectRoot = findProjectRoot();
         std::string trainDataPath = projectRoot + "/train_data";
+        std::string datasetName = getDatasetId(info);
+
+        if (fs::exists(trainDataPath)) {
+            std::cout << "[INFO] Dataset directory already exists: " << trainDataPath << std::endl;
+        } else {
+            fs::create_directories(trainDataPath);
+        }
+
+        int totalFiles = filenum;
+        double aliveratio = ratio;
+
+        std::cout << "🚀 OPTIMIZED totalData:" << totalFiles << " (file name: " << trainDataPath + "/" + datasetName << ")" << std::endl;
+        std::cout << "aliveratio:" << aliveratio << std::endl;
+        std::cout << "max generation:" << MAXGEN << std::endl;
+        std::cout << "pattern size:" << HEIGHT << " * " << WIDTH << std::endl;
+        std::cout << "board size:" << BOARDHEIGHT << " * " << BOARDWIDTH << std::endl;
+
+        auto startTime = std::chrono::steady_clock::now();
+
+        // 고정 시드 기반 난수 엔진 (파일 ID 오프셋으로 각 샘플을 유일화하되 결정성 유지)
+        std::mt19937_64 global_gen(static_cast<uint64_t>(seed));
+        std::uniform_int_distribution<int> offset_dist(0, std::numeric_limits<int>::max());
+
+        std::ofstream fout(trainDataPath + "/" + datasetName + ".txt");
+
+        for (int fileId = 1; fileId <= totalFiles; ++fileId) {
+            // 각 샘플에 대해 고유하지만 결정적인 시드를 생성
+            // 시드 충돌 줄이기 위해 64비트 혼합
+            uint64_t file_seed = static_cast<uint64_t>(seed) ^ (static_cast<uint64_t>(fileId) * 0x9E3779B97F4A7C15ULL);
+            // 패턴 생성에 시드 적용
+            d_matrix_2<int> pattern = generateFixedRatioPatternWithSeed(BOARDHEIGHT, BOARDWIDTH, HEIGHT, WIDTH, aliveratio, static_cast<int>(file_seed & 0x7fffffff), stream);
+
+            pattern.cpyToHost(stream);
+            
+            // ⚡ 최적화된 시뮬레이션 사용 (배치 처리로 CPU-GPU 오버헤드 최소화)
+            int label = simulatePatternInKernal(pattern, fileId, stream);
+
+            int startRow = (BOARDHEIGHT - HEIGHT) / 2;
+            int startCol = (BOARDWIDTH - WIDTH) / 2;
+            
+            // GPU 작업이 완료될 때까지 대기
+            cudaStreamSynchronize(stream);
+
+            fout << "[" << fileId << "]" << '\n';
+            // 초기 패턴 저장
+            for (int i = startRow; i < startRow + HEIGHT; ++i) {
+                for (int j = startCol; j < startCol + WIDTH; ++j) {
+                    fout << pattern(i, j);
+                }
+                fout << '\n';
+            }
+
+            fout << label << '\n';
+            
+            // 진행률 표시 최적화: 매 100번째마다만 업데이트
+            if (fileId % 100 == 0 || fileId == totalFiles) {
+                std::string prograss_name = "🚀 Optimized GOL data generating... " + std::to_string(fileId) + "/" + std::to_string(totalFiles);
+                printProgressBar(fileId, totalFiles, startTime, prograss_name);
+            }
+        }
+        fout.close();
+        
+        std::cout << std::endl << "[Done] Optimized dataset generation complete." << std::endl;
+
+        auto totalElapsed = std::chrono::steady_clock::now() - startTime;
+        int totalSec = std::chrono::duration_cast<std::chrono::seconds>(totalElapsed).count();
+        std::cout << "총 실행 시간: " << totalSec << " 초" << std::endl;
+
+        cudaStreamDestroy(stream);
+    }
+
+    void generateGameOfLifeDataOptimizeInOneFile_RootFlexible(int filenum, double ratio, int seed, dataset_id info, std::string generate_root) {
+        int deviceCount = 0;
+        cudaError_t err = cudaGetDeviceCount(&deviceCount);
+        if (err != cudaSuccess || deviceCount == 0) {
+            std::cerr << "[FATAL] No CUDA device: " << cudaGetErrorString(err) << std::endl;
+            exit(1);
+        }
+        cudaSetDevice(0);
+
+        // 스트림 생성
+        cudaStream_t stream;
+        cudaStreamCreate(&stream);
+
+        std::string projectRoot = findProjectRoot();
+        std::string trainDataPath = projectRoot + generate_root;
         std::string datasetName = getDatasetId(info);
 
         if (fs::exists(trainDataPath)) {

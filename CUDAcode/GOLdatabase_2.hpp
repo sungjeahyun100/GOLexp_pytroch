@@ -71,8 +71,8 @@ namespace GOL_2 {
 
     // Game of Life 데이터 생성 (동일 시드 -> 동일 데이터셋)
     void generateGameOfLifeData(int filenum, double ratio, int seed, dataset_id info);
-
     void generateGameOfLifeDataInOneFile(int filenum, double ratio, int seed, dataset_id info);
+    void generateGameOfLifeDataInOneFile_RootFlexible(int filenum, double ratio, int seed, dataset_id info, std::string generate_root);
 
     // 시뮬레이션 및 라벨링 (최종 패턴 반환)
     d_matrix_2<int> simulateAndLabelingtopattern(const d_matrix_2<int>& initialPattern, int fileId, cudaStream_t str = 0);
@@ -97,4 +97,5 @@ namespace GOL_2 {
     // ⚡ CPU-GPU 오버헤드 최적화된 데이터 생성 함수들 (simulatePatternInKernal 사용)
     void generateGameOfLifeDataOptimize(int filenum, double ratio, int seed, dataset_id info);
     void generateGameOfLifeDataOptimizeInOneFile(int filenum, double ratio, int seed, dataset_id info);
+    void generateGameOfLifeDataOptimizeInOneFile_RootFlexible(int filenum, double ratio, int seed, dataset_id info, std::string generate_root);
 }

@@ -6,27 +6,6 @@
 #include <algorithm>
 
 extern "C"{
-    // GPU 멀티파일 데이터 생성
-    void genGOLdata(uint32_t seed, uint32_t sample_quantity, double alive_ratio){
-        std::cout << "🚀 GPU 모드로 데이터 생성 중..." << std::endl;
-        dataset_id config;
-        config.alive_ratio = alive_ratio;
-        config.sample_quantity = sample_quantity;
-        config.seed = seed;
-        GOL_2::generateGameOfLifeData(sample_quantity, alive_ratio, seed, config);
-        std::cout << "✅ GPU 데이터 생성 완료!" << std::endl;
-    }
-    
-    // GPU 단일파일 데이터 생성
-    void genGOLdataInOneFile(uint32_t seed, uint32_t sample_quantity, double alive_ratio){
-        std::cout << "📁 단일 파일 모드로 데이터 생성 중..." << std::endl;
-        dataset_id config;
-        config.alive_ratio = alive_ratio;
-        config.sample_quantity = sample_quantity;
-        config.seed = seed;
-        GOL_2::generateGameOfLifeDataInOneFile(sample_quantity, alive_ratio, seed, config);
-        std::cout << "✅ 단일 파일 데이터 생성 완료!" << std::endl;
-    }
     
     // 패턴 예측 함수 (GPU 버전)
     int getPredict(int* initialPattern){
@@ -134,16 +113,7 @@ extern "C"{
         std::cout << "최적화 " << time2.count() / 1000.0 / iterations << "ms/패턴" << std::endl;
     }
 
-    // ⚡ CPU-GPU 오버헤드 최적화된 GPU 멀티파일 데이터 생성
-    void genGOLdataOptimize(uint32_t seed, uint32_t sample_quantity, double alive_ratio){
-        std::cout << "🚀⚡ OPTIMIZED GPU 모드로 데이터 생성 중..." << std::endl;
-        dataset_id config;
-        config.alive_ratio = alive_ratio;
-        config.sample_quantity = sample_quantity;
-        config.seed = seed;
-        GOL_2::generateGameOfLifeDataOptimize(sample_quantity, alive_ratio, seed, config);
-        std::cout << "✅ OPTIMIZED GPU 데이터 생성 완료!" << std::endl;
-    }
+
     
     // ⚡ CPU-GPU 오버헤드 최적화된 GPU 단일파일 데이터 생성
     void genGOLdataOptimizeInOneFile(uint32_t seed, uint32_t sample_quantity, double alive_ratio){
@@ -154,6 +124,16 @@ extern "C"{
         config.seed = seed;
         GOL_2::generateGameOfLifeDataOptimizeInOneFile(sample_quantity, alive_ratio, seed, config);
         std::cout << "✅ OPTIMIZED 단일 파일 데이터 생성 완료!" << std::endl;
+    }
+
+    void genGOLdataOptimizeInOneFile_RootFlexible(uint32_t seed, uint32_t sample_quantity, double alive_ratio, const char* root){
+        std::cout << "🚀⚡ OPTIMIZED GPU 모드로 데이터 생성 중..." << std::endl;
+        dataset_id config;
+        config.alive_ratio = alive_ratio;
+        config.sample_quantity = sample_quantity;
+        config.seed = seed;
+        GOL_2::generateGameOfLifeDataOptimizeInOneFile_RootFlexible(sample_quantity, alive_ratio, seed, config, static_cast<std::string>(root));
+        std::cout << "✅ OPTIMIZED GPU 데이터 생성 완료!" << std::endl;
     }
 }
 
