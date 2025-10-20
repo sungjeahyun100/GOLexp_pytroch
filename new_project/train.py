@@ -68,11 +68,15 @@ def print_available_models():
             return
             
         print("\n📊 사용 가능한 모델 설정:")
-        for i, (name, info) in enumerate(config['model_configs'].items(), 1):
+        i = 1
+        for name, info in config['model_configs'].items():
+            if name.startswith('_'):
+                continue
             print(f"  {i}. {name} - {info['name']}")
             print(f"     크기: {info['hidden1_size']}→{info['hidden2_size']}, 활성화: {info['activation']}")
             print(f"     추천: epochs={info['recommended_epochs']}, lr={info['recommended_lr']}, batch={info['recommended_batch_size']}")
             print(f"     설명: {info['description']}")
+            i += 1
         print()
     except Exception as e:
         print(f"❌ 모델 목록 로드 실패: {e}")
@@ -112,12 +116,16 @@ def print_available_experiments():
             return
             
         print("\n🧪 사용 가능한 실험 설정:")
-        for i, (name, info) in enumerate(config['custom_experiments'].items(), 1):
+        i = 1
+        for name, info in config['custom_experiments'].items():
+            if name.startswith('_'):
+                continue
             print(f"  {i}. {name} - {info['name']}")
             print(f"     데이터셋: {info['dataset']}, 모델: {info['model']}")
             print(f"     훈련: epochs={info['training_params']['epochs']}, lr={info['training_params']['learning_rate']}")
             print(f"     설명: {info['description']}")
             print(f"     노트: {info['notes']}")
+            i += 1
         print()
     except Exception as e:
         print(f"❌ 실험 목록 로드 실패: {e}")
@@ -161,17 +169,32 @@ def parse_args():
     
     return parser.parse_args()
 
-def train_model(model, dataloader, epochs, lr, quiet=False):
-    """모델 훈련"""
+def train_model(model, dataloader, epochs, lr, quiet=False, exp_dir=None):
+    """모델 훈련 및 로스 기록"""
     criterion = nn.BCELoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     
+    # 로깅 파일 준비
+    epoch_loss_file = None
+    batch_loss_file = None
+    if exp_dir:
+        try:
+            epoch_loss_path = os.path.join(exp_dir, "epoch-loss.txt")
+            batch_loss_path = os.path.join(exp_dir, "batch-loss.txt")
+            epoch_loss_file = open(epoch_loss_path, 'w', encoding='utf-8')
+            batch_loss_file = open(batch_loss_path, 'w', encoding='utf-8')
+            # 헤더 작성
+            epoch_loss_file.write("epoch,avg_loss\n")
+            batch_loss_file.write("epoch,batch_num,loss\n")
+        except IOError as e:
+            print(f"⚠️ 로깅 파일 열기 실패: {e}")
+            exp_dir = None # 로깅 비활성화
+
     model.train()
     for epoch in range(epochs):
         total_loss = 0
-        batch_count = 0
         
-        for batch_x, batch_y in dataloader:
+        for i, (batch_x, batch_y) in enumerate(dataloader):
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
             
@@ -181,13 +204,28 @@ def train_model(model, dataloader, epochs, lr, quiet=False):
             loss.backward()
             optimizer.step()
             
-            total_loss += loss.item()
-            batch_count += 1
+            batch_loss = loss.item()
+            total_loss += batch_loss
+            
+            # 배치 로스 기록
+            if batch_loss_file:
+                batch_loss_file.write(f"{epoch+1},{i+1},{batch_loss:.6f}\n")
         
+        avg_loss = total_loss / len(dataloader) if len(dataloader) > 0 else 0
+        
+        # 에폭 로스 기록
+        if epoch_loss_file:
+            epoch_loss_file.write(f"{epoch+1},{avg_loss:.6f}\n")
+
         if not quiet and (epoch + 1) % 10 == 0:
-            avg_loss = total_loss / batch_count if batch_count > 0 else 0
             print("Epoch [{}/{}], Loss: {:.4f}".format(epoch+1, epochs, avg_loss))
     
+    # 파일 닫기
+    if epoch_loss_file:
+        epoch_loss_file.close()
+    if batch_loss_file:
+        batch_loss_file.close()
+
     return optimizer
 
 def main():
@@ -358,9 +396,21 @@ def main():
         if dataloader is not None:
             print("📊 데이터셋 배치 수: {}".format(len(dataloader)))
     
+    # 로깅 및 실험 ID 설정
+    if args.experiment:
+        exp_id = args.experiment
+    else:
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        exp_id = f"{timestamp}_{dataset_name}_{model_name}"
+
+    exp_dir = os.path.join("graph", exp_id)
+    if not args.quiet:
+        print(f"📈 로스 기록 경로: {exp_dir}")
+    os.makedirs(exp_dir, exist_ok=True)
+
     # 훈련
     start_time = time.time()
-    optimizer = train_model(model, dataloader, args.epochs, args.lr, args.quiet)
+    optimizer = train_model(model, dataloader, args.epochs, args.lr, args.quiet, exp_dir=exp_dir)
     end_time = time.time()
     
     if not args.quiet:

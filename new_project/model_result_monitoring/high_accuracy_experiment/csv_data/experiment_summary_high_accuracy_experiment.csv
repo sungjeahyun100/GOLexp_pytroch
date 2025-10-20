@@ -1,0 +1,2 @@
+experiment_id,total_epochs,total_batches,initial_loss,final_loss,min_loss,gradient_ratio,convergence_status,total_improvement,avg_batch_std,avg_batch_var,generation_time
+high_accuracy_experiment,70,21910,0.481638,0.042502,0.031488,0.3425880408065604,정상적인 수렴,0.439136,0.05182759603631759,0.003016181328976124,2025-10-20 21:31:28

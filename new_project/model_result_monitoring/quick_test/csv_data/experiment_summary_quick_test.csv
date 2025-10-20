@@ -1,0 +1,2 @@
+experiment_id,total_epochs,total_batches,initial_loss,final_loss,min_loss,gradient_ratio,convergence_status,total_improvement,avg_batch_std,avg_batch_var,generation_time
+quick_test,100,2400,0.554794,0.125849,0.125849,0.5546053096185791,활발한 학습,0.428945,0.022524537803103737,0.0023781286089331337,2025-10-20 21:31:25

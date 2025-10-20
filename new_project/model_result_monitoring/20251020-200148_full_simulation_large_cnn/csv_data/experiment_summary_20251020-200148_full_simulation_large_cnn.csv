@@ -1,0 +1,2 @@
+experiment_id,total_epochs,total_batches,initial_loss,final_loss,min_loss,gradient_ratio,convergence_status,total_improvement,avg_batch_std,avg_batch_var,generation_time
+20251020-200148_full_simulation_large_cnn,70,433160,0.417564,0.235265,0.235265,0.4689762885134176,정상적인 수렴,0.182299,0.05871104760966561,0.003458212848401574,2025-10-20 21:31:22
